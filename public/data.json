@@ -1,0 +1,212 @@
+{
+  "TY": {
+    "des": {
+      "n": "Pouštní",
+      "c": [
+        "#f0cd8a",
+        "#8a5a24"
+      ],
+      "m": [
+        1.25,
+        1
+      ]
+    },
+    "ice": {
+      "n": "Ledová",
+      "c": [
+        "#eaf8ff",
+        "#5f93b8"
+      ],
+      "m": [
+        1,
+        1.25
+      ]
+    },
+    "jun": {
+      "n": "Džunglová",
+      "c": [
+        "#8fe08a",
+        "#245f33"
+      ],
+      "m": [
+        1.1,
+        1.1
+      ]
+    },
+    "vol": {
+      "n": "Sopečná",
+      "c": [
+        "#ffa95a",
+        "#5e170c"
+      ],
+      "m": [
+        1.5,
+        0.8
+      ]
+    },
+    "oce": {
+      "n": "Oceánská",
+      "c": [
+        "#7fcfff",
+        "#1a4585"
+      ],
+      "m": [
+        0.9,
+        1.4
+      ]
+    }
+  },
+  "SYS": [
+    "Sol",
+    "Abydos",
+    "Chulak",
+    "Cimmeria",
+    "Orilla",
+    "Tollana",
+    "Langara",
+    "Vorash",
+    "Kheb",
+    "Altair",
+    "Dakara",
+    "Atlantis"
+  ],
+  "LORDS": [
+    "Apophis",
+    "Baal",
+    "Yu",
+    "Cronus",
+    "Anubis",
+    "Sokar",
+    "Nirrti",
+    "Camulus"
+  ],
+  "B": {
+    "naq": {
+      "n": "Důl na naquadah",
+      "d": "Těží naquadah na této planetě.",
+      "c": [
+        60,
+        30
+      ],
+      "f": 1.6
+    },
+    "tri": {
+      "n": "Důl na trinium",
+      "d": "Těží trinium na této planetě.",
+      "c": [
+        80,
+        20
+      ],
+      "f": 1.6
+    },
+    "reak": {
+      "n": "Naquadahový reaktor",
+      "d": "Energie pro doly na této planetě.",
+      "c": [
+        100,
+        60
+      ],
+      "f": 1.7
+    }
+  },
+  "G": {
+    "lab": {
+      "n": "Laboratoř Dr. Carterové",
+      "d": "Odemyká výzkum (společná pro všechny planety).",
+      "c": [
+        150,
+        120
+      ],
+      "f": 1.8
+    },
+    "han": {
+      "n": "Hangár",
+      "d": "Odemyká F-302 (úr. 1), Tel'tak (úr. 1) a Daedalus (úr. 3).",
+      "c": [
+        200,
+        150
+      ],
+      "f": 1.8
+    }
+  },
+  "R": {
+    "zbr": {
+      "n": "Zbraně: zat a naquadahové hlavice",
+      "d": "+10 % síly útoku za úroveň.",
+      "c": [
+        200,
+        150
+      ],
+      "f": 1.9
+    },
+    "stit": {
+      "n": "Štíty a iris",
+      "d": "Ztráty jednotek a dobytí planet nižší o 8 % za úroveň.",
+      "c": [
+        250,
+        250
+      ],
+      "f": 1.9
+    },
+    "poh": {
+      "n": "Hyperprostorový pohon",
+      "d": "Cesty bránou kratší o 15 % za úroveň.",
+      "c": [
+        300,
+        250
+      ],
+      "f": 1.9
+    },
+    "kol": {
+      "n": "Astrofyzika",
+      "d": "+1 kolonie za úroveň.",
+      "c": [
+        300,
+        300
+      ],
+      "f": 2.2
+    }
+  },
+  "U": {
+    "sg": {
+      "n": "Tým SG",
+      "d": "Pěchota. Síla 5.",
+      "c": [
+        40,
+        10
+      ],
+      "atk": 5,
+      "need": 0
+    },
+    "f302": {
+      "n": "Stíhačka F-302",
+      "d": "Rychlý letoun. Síla 18.",
+      "c": [
+        120,
+        90
+      ],
+      "atk": 18,
+      "need": 1
+    },
+    "dae": {
+      "n": "Křižník Daedalus",
+      "d": "Bitevní loď. Síla 120.",
+      "c": [
+        900,
+        700
+      ],
+      "atk": 120,
+      "need": 3
+    },
+    "tel": {
+      "n": "Tel'tak",
+      "d": "Kolonizační loď, veze osadníky na volnou planetu.",
+      "c": [
+        400,
+        300
+      ],
+      "atk": 0,
+      "need": 1
+    }
+  }
+}
