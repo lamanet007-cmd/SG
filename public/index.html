@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stargate: Galaktické velení</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<header>
+  <h1>Stargate: Galaktické velení</h1>
+  <p>Kolonizuj planety, zkoumej technologie a veď válku se System Lordy.</p>
+  <svg id="gate" viewBox="0 0 400 400" role="img" aria-label="Hvězdná brána">
+    <defs>
+      <radialGradient id="eh"><stop offset="0" stop-color="#e8f8ff"/><stop offset=".45" stop-color="#6cc4ff"/><stop offset="1" stop-color="#1f6fb8"/></radialGradient>
+      <radialGradient id="metal"><stop offset=".78" stop-color="#4a5560"/><stop offset=".9" stop-color="#2a323b"/><stop offset="1" stop-color="#1a2027"/></radialGradient>
+    </defs>
+    <g id="horizon"><circle cx="200" cy="200" r="138" fill="url(#eh)"/>
+      <path d="M200 70a130 130 0 0 1 90 40M330 200a130 130 0 0 1-40 90M200 330a130 130 0 0 1-90-40M70 200a130 130 0 0 1 40-90" stroke="#fff" stroke-opacity=".6" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="200" cy="200" r="60" fill="#e8f8ff" fill-opacity=".35"/></g>
+    <g id="ring"><circle cx="200" cy="200" r="190" fill="url(#metal)" stroke="#0e1216" stroke-width="3"/>
+      <circle cx="200" cy="200" r="140" fill="#0d1014" stroke="#5c6975" stroke-width="3"/>
+      <g id="glyphs" fill="none" stroke="#c9a24b" stroke-width="2"></g></g>
+    <g id="chevs"></g>
+  </svg>
+</header>
+<div class="res">
+  <div><small>Naquadah</small><b id="r-n"></b><small id="p-n"></small></div>
+  <div><small>Trinium</small><b id="r-t"></b><small id="p-t"></small></div>
+  <div><small>Planety</small><b id="r-p"></b><small id="p-p"></small></div>
+</div>
+<nav>
+  <button data-tab="base" class="act">Základna</button>
+  <button data-tab="lab">Výzkum</button>
+  <button data-tab="hangar">Hangár</button>
+  <button data-tab="map">Galaxie</button>
+</nav>
+<main><section id="tab"></section><div id="log"></div></main>
+<div id="battle" hidden role="dialog" aria-modal="true"><div class="bbox"><h2 id="b-title"></h2>
+<small>Tvá flotila</small><div class="bar"><i id="b-a"></i></div><small>Obránci</small><div class="bar"><i id="b-d"></i></div>
+<div id="b-res"></div><button class="go" id="b-close">Zavřít hlášení</button></div></div>
+<footer>Fanouškovská hra bez vazby na MGM. <button id="reset">Smazat postup</button></footer>
+
+<script src="game.js" defer></script>
+</body>
+</html>
