@@ -1,0 +1,509 @@
+{
+ "TY": {
+  "des": {
+   "n": "Pouštní",
+   "c": [
+    "#f0cd8a",
+    "#8a5a24"
+   ],
+   "m": [
+    1.25,
+    1
+   ]
+  },
+  "ice": {
+   "n": "Ledová",
+   "c": [
+    "#eaf8ff",
+    "#5f93b8"
+   ],
+   "m": [
+    1,
+    1.25
+   ]
+  },
+  "jun": {
+   "n": "Džunglová",
+   "c": [
+    "#8fe08a",
+    "#245f33"
+   ],
+   "m": [
+    1.1,
+    1.1
+   ]
+  },
+  "vol": {
+   "n": "Sopečná",
+   "c": [
+    "#ffa95a",
+    "#5e170c"
+   ],
+   "m": [
+    1.5,
+    0.8
+   ]
+  },
+  "oce": {
+   "n": "Oceánská",
+   "c": [
+    "#7fcfff",
+    "#1a4585"
+   ],
+   "m": [
+    0.9,
+    1.4
+   ]
+  }
+ },
+ "SYS": [
+  "Sol",
+  "Abydos",
+  "Chulak",
+  "Cimmeria",
+  "Orilla",
+  "Tollana",
+  "Langara",
+  "Vorash",
+  "Kheb",
+  "Altair",
+  "Dakara",
+  "Atlantis"
+ ],
+ "LORDS": [
+  "Apophis",
+  "Baal",
+  "Yu",
+  "Cronus",
+  "Anubis",
+  "Sokar",
+  "Nirrti",
+  "Camulus"
+ ],
+ "B": {
+  "naq": {
+   "n": "Důl na naquadah",
+   "d": "Těží naquadah na této planetě.",
+   "c": [
+    60,
+    30
+   ],
+   "f": 1.6
+  },
+  "tri": {
+   "n": "Důl na trinium",
+   "d": "Těží trinium na této planetě.",
+   "c": [
+    80,
+    20
+   ],
+   "f": 1.6
+  },
+  "reak": {
+   "n": "Naquadahový reaktor",
+   "d": "Energie pro doly na této planetě.",
+   "c": [
+    100,
+    60
+   ],
+   "f": 1.7
+  },
+  "def": {
+   "n": "Obranná platforma",
+   "d": "+25 obrany planety za úroveň.",
+   "c": [
+    120,
+    80
+   ],
+   "f": 1.7
+  },
+  "shd": {
+   "n": "Planetární štít",
+   "d": "+15 % obrany planety za úroveň.",
+   "c": [
+    300,
+    250
+   ],
+   "f": 1.9,
+   "req": {
+    "r": {
+     "stit": 2
+    }
+   }
+  }
+ },
+ "G": {
+  "lab": {
+   "n": "Laboratoř Dr. Carterové",
+   "d": "Odemyká výzkum.",
+   "c": [
+    150,
+    120
+   ],
+   "f": 1.8
+  },
+  "han": {
+   "n": "Hangár",
+   "d": "Odemyká letouny a lodě, vyšší úroveň silnější typy.",
+   "c": [
+    200,
+    150
+   ],
+   "f": 1.8
+  },
+  "kas": {
+   "n": "Kasárna",
+   "d": "Úroveň 2 odemyká elitní jednotky.",
+   "c": [
+    120,
+    80
+   ],
+   "f": 1.7
+  },
+  "dip": {
+   "n": "Diplomatická kancelář",
+   "d": "Úroveň = nejvýše tolik spojenců v koalici (max. 3).",
+   "c": [
+    250,
+    200
+   ],
+   "f": 2
+  }
+ },
+ "R": {
+  "zbr": {
+   "n": "Zbraně",
+   "d": "+10 % síla útoku za úroveň.",
+   "c": [
+    200,
+    150
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "stit": {
+   "n": "Štíty a iris",
+   "d": "Ztráty o 8 % nižší za úroveň.",
+   "c": [
+    250,
+    250
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "poh": {
+   "n": "Hyperprostorový pohon",
+   "d": "Cesty bránou o 15 % kratší za úroveň.",
+   "c": [
+    300,
+    250
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "kol": {
+   "n": "Astrofyzika",
+   "d": "+1 kolonie za úroveň.",
+   "c": [
+    300,
+    300
+   ],
+   "f": 2.2,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "ener": {
+   "n": "Energetika",
+   "d": "+10 % energie z reaktorů za úroveň.",
+   "c": [
+    250,
+    200
+   ],
+   "f": 1.8,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "tez": {
+   "n": "Těžební technologie",
+   "d": "+8 % těžba za úroveň.",
+   "c": [
+    250,
+    200
+   ],
+   "f": 1.8,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "zat": {
+   "n": "Zat'nik'tel",
+   "d": "Odemyká elitní jednotky.",
+   "c": [
+    450,
+    350
+   ],
+   "f": 2,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "zbr": 2
+    }
+   }
+  },
+  "mat": {
+   "n": "Trinium-naquadahová slitina",
+   "d": "Odemyká křižníky a vlajkové lodě.",
+   "c": [
+    600,
+    500
+   ],
+   "f": 2,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "tez": 2
+    }
+   }
+  },
+  "obr": {
+   "n": "Obranné systémy",
+   "d": "+10 % obrana planet za úroveň.",
+   "c": [
+    400,
+    350
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "stit": 1
+    }
+   }
+  }
+ },
+ "RACES": {
+  "tauri": {
+   "n": "Tau'ri",
+   "d": "Lidé ze Země. Vynalézaví a dobře vyzbrojení.",
+   "c": [
+    "#4fb6ff",
+    "#1f4f8f"
+   ],
+   "home": "Země",
+   "bonus": "+10 % síla všech jednotek",
+   "eff": {
+    "atk": 1.1
+   },
+   "ally": {
+    "atk": 1.05
+   },
+   "allyT": "+5 % síla útoku",
+   "u": [
+    "Tým SG",
+    "Speciální jednotky",
+    "F-302",
+    "Daedalus",
+    "Odyssey",
+    "Tel'tak"
+   ]
+  },
+  "jaffa": {
+   "n": "Jaffa",
+   "d": "Hrdí bojovníci, kteří se vzbouřili proti Goa'uldům.",
+   "c": [
+    "#e8b04a",
+    "#7a4a12"
+   ],
+   "home": "Chulak",
+   "bonus": "+30 % síla pěchoty, pěchota o 25 % levnější",
+   "eff": {
+    "inf": 1.3,
+    "ucost": 0.75
+   },
+   "ally": {
+    "inf": 1.15
+   },
+   "allyT": "+15 % síla pěchoty",
+   "u": [
+    "Jaffský válečník",
+    "Elitní Jaffa",
+    "Death Glider",
+    "Ha'tak",
+    "Mateřská loď",
+    "Al'kesh"
+   ]
+  },
+  "tokra": {
+   "n": "Tok'ra",
+   "d": "Tajní odbojáři. Skrývají se a brání se chytře.",
+   "c": [
+    "#6fe0b0",
+    "#1c6a52"
+   ],
+   "home": "Vorash",
+   "bonus": "+30 % obrana planet, výzkum o 15 % levnější",
+   "eff": {
+    "def": 1.3,
+    "res": 0.85
+   },
+   "ally": {
+    "def": 1.15
+   },
+   "allyT": "+15 % obrana planet",
+   "u": [
+    "Agent Tok'ra",
+    "Elitní agent",
+    "Tok'ra stíhač",
+    "Tok'ra křižník",
+    "Tok'ra Ha'tak",
+    "Tok'ra transportér"
+   ]
+  },
+  "asgard": {
+   "n": "Asgardi",
+   "d": "Pokročilá rasa vědců. Slabší v boji, silná v technologiích.",
+   "c": [
+    "#c8d4e0",
+    "#5a6b80"
+   ],
+   "home": "Orilla",
+   "bonus": "+20 % těžba, výzkum o 25 % levnější, −10 % síla",
+   "eff": {
+    "prod": 1.2,
+    "res": 0.75,
+    "atk": 0.9
+   },
+   "ally": {
+    "res": 0.9,
+    "prod": 1.05
+   },
+   "allyT": "výzkum −10 % ceny, +5 % těžba",
+   "u": [
+    "Asgardský strážce",
+    "Asgardský operativec",
+    "Asgardský stíhač",
+    "Beliskner",
+    "Beliskner O'Neill",
+    "Asgardský transportér"
+   ]
+  }
+ },
+ "UN": {
+  "inf": {
+   "d": "Základní pěchota.",
+   "c": [
+    40,
+    10
+   ],
+   "atk": 5
+  },
+  "elite": {
+   "d": "Elitní bojovníci s pokročilou výzbrojí.",
+   "c": [
+    110,
+    60
+   ],
+   "atk": 16,
+   "req": {
+    "g": {
+     "kas": 2
+    },
+    "r": {
+     "zat": 1
+    }
+   }
+  },
+  "ftr": {
+   "d": "Rychlé stíhače pro boj ve vzduchu i v kosmu.",
+   "c": [
+    130,
+    90
+   ],
+   "atk": 20,
+   "req": {
+    "g": {
+     "han": 1
+    },
+    "r": {
+     "zbr": 1
+    }
+   }
+  },
+  "crs": {
+   "d": "Bitevní křižník, páteř flotily.",
+   "c": [
+    900,
+    700
+   ],
+   "atk": 130,
+   "req": {
+    "g": {
+     "han": 3
+    },
+    "r": {
+     "zbr": 3,
+     "stit": 2,
+     "mat": 1
+    }
+   }
+  },
+  "flg": {
+   "d": "Vlajková loď. Rozdrtí i nejsilnější obranu.",
+   "c": [
+    3800,
+    3000
+   ],
+   "atk": 520,
+   "req": {
+    "g": {
+     "han": 5
+    },
+    "r": {
+     "zbr": 5,
+     "stit": 4,
+     "ener": 3,
+     "mat": 3
+    }
+   }
+  },
+  "col": {
+   "d": "Kolonizační loď, veze osadníky na volnou planetu.",
+   "c": [
+    400,
+    300
+   ],
+   "atk": 0,
+   "req": {
+    "g": {
+     "han": 1
+    }
+   }
+  }
+ }
+}
