@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e12">
+<title>Stargate: Galaktické velení</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="sky l1" id="l1"></div><div class="sky l2" id="l2"></div><div class="sky l3" id="l3"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs>
+<symbol id="i-naq" viewBox="0 0 24 24"><path d="M12 2l8 7-8 13L4 9z" fill="currentColor"/></symbol>
+<symbol id="i-tri" viewBox="0 0 24 24"><path d="M12 2l8 5v10l-8 5-8-5V7z" fill="currentColor"/></symbol>
+<symbol id="i-reak" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/></g></symbol>
+<symbol id="i-def" viewBox="0 0 24 24"><path d="M4 20h16v-3H4zM8 17v-6h8v6zM11 11V5h2v6zM13 7h6v2h-6z" fill="currentColor"/></symbol>
+<symbol id="i-shd" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="currentColor"/></symbol>
+<symbol id="i-stit" viewBox="0 0 24 24"><use href="#i-shd"/></symbol><symbol id="i-obr" viewBox="0 0 24 24"><use href="#i-shd"/></symbol>
+<symbol id="i-lab" viewBox="0 0 24 24"><path d="M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" fill="currentColor"/></symbol>
+<symbol id="i-han" viewBox="0 0 24 24"><path d="M3 20v-9l9-7 9 7v9h-4v-6H7v6z" fill="currentColor"/></symbol>
+<symbol id="i-kas" viewBox="0 0 24 24"><path d="M5 3h2v18H5zM8 4h11l-3 4 3 4H8z" fill="currentColor"/></symbol>
+<symbol id="i-dip" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></g></symbol>
+<symbol id="i-inf" viewBox="0 0 24 24"><circle cx="12" cy="6" r="3.5" fill="currentColor"/><path d="M5 21c0-5 3-8 7-8s7 3 7 8z" fill="currentColor"/></symbol>
+<symbol id="i-elite" viewBox="0 0 24 24"><use href="#i-inf"/><path d="M19 1l1 2.5 2.5.3-1.9 1.7.6 2.5L19 6.6l-2.2 1.4.6-2.5-1.9-1.7 2.5-.3z" fill="currentColor"/></symbol>
+<symbol id="i-ftr" viewBox="0 0 24 24"><path d="M12 2l3 9 7 4v2l-7-2-1 5 2 2v1l-4-1-4 1v-1l2-2-1-5-7 2v-2l7-4z" fill="currentColor"/></symbol>
+<symbol id="i-crs" viewBox="0 0 24 24"><path d="M2 14l4-3h12l4 3-4 3H6zM8 11l2-4h4l2 4z" fill="currentColor"/></symbol>
+<symbol id="i-flg" viewBox="0 0 24 24"><path d="M1 15l5-3 3-6h6l3 6 5 3-5 4H6zM10 8h4v4h-4z" fill="currentColor"/></symbol>
+<symbol id="i-col" viewBox="0 0 24 24"><circle cx="10" cy="14" r="7" fill="currentColor"/><path d="M19 2h2v6h-2zM17 4h6v2h-6z" fill="currentColor"/></symbol>
+<symbol id="i-zbr" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></g></symbol>
+<symbol id="i-poh" viewBox="0 0 24 24"><path d="M12 12a2 2 0 1 1 2 2 4 4 0 1 1-4-4 6 6 0 1 1 6 6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-kol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/><ellipse cx="12" cy="12" rx="11" ry="3.5" fill="none" stroke="currentColor" stroke-width="1.5" transform="rotate(-20 12 12)"/></symbol>
+<symbol id="i-ener" viewBox="0 0 24 24"><path d="M13 2L5 14h6l-1 8 8-12h-6z" fill="currentColor"/></symbol>
+<symbol id="i-zat" viewBox="0 0 24 24"><use href="#i-ener"/></symbol><symbol id="i-tez" viewBox="0 0 24 24"><use href="#i-naq"/></symbol><symbol id="i-mat" viewBox="0 0 24 24"><use href="#i-tri"/></symbol>
+<symbol id="i-ter" viewBox="0 0 24 24"><path d="M20 4C10 4 4 9 4 16c0 2 1 4 3 4 7 0 13-6 13-16z" fill="currentColor"/></symbol>
+</svg>
+<header>
+  <svg id="gate" viewBox="0 0 400 400" role="img" aria-label="Hvězdná brána">
+    <defs>
+      <radialGradient id="eh"><stop offset="0" stop-color="#e8f8ff"/><stop offset=".45" stop-color="#6cc4ff"/><stop offset="1" stop-color="#1f6fb8"/></radialGradient>
+      <radialGradient id="metal"><stop offset=".78" stop-color="#4a5560"/><stop offset=".9" stop-color="#2a323b"/><stop offset="1" stop-color="#1a2027"/></radialGradient>
+    </defs>
+    <g id="horizon"><circle cx="200" cy="200" r="138" fill="url(#eh)"/>
+      <path d="M200 70a130 130 0 0 1 90 40M330 200a130 130 0 0 1-40 90M200 330a130 130 0 0 1-90-40M70 200a130 130 0 0 1 40-90" stroke="#fff" stroke-opacity=".6" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="200" cy="200" r="60" fill="#e8f8ff" fill-opacity=".35"/></g>
+    <g id="ring"><circle cx="200" cy="200" r="190" fill="url(#metal)" stroke="#0e1216" stroke-width="3"/>
+      <circle cx="200" cy="200" r="140" fill="#0d1014" stroke="#5c6975" stroke-width="3"/>
+      <g id="glyphs" fill="none" stroke="#c9a24b" stroke-width="2"></g></g>
+    <g id="chevs"></g>
+  </svg>
+  <div class="title"><h1>Stargate: Galaktické velení</h1><div class="who"><span id="emb"></span><span id="who"></span></div></div>
+</header>
+<div class="res">
+  <div class="n"><small>Naquadah</small><b id="r-n"></b><small id="p-n"></small></div>
+  <div class="t"><small>Trinium</small><b id="r-t"></b><small id="p-t"></small></div>
+  <div class="p"><small>Planety</small><b id="r-p"></b><small id="p-p"></small></div>
+</div>
+<main><section id="tab"></section><div id="log" aria-live="polite"></div>
+<footer>Fanouškovská hra bez vazby na MGM. <button id="reset">Smazat postup</button></footer></main>
+<nav aria-label="Hlavní menu">
+  <button data-tab="over" class="act"><i>◈</i>Přehled</button>
+  <button data-tab="base"><i>▤</i>Základna</button>
+  <button data-tab="lab"><i>⚗</i>Výzkum</button>
+  <button data-tab="hangar"><i>➤</i>Flotila</button>
+  <button data-tab="map"><i>✺</i>Galaxie</button>
+  <button data-tab="dip"><i>⚑</i>Diplomacie</button>
+</nav>
+<div id="pick" hidden role="dialog" aria-modal="true" aria-labelledby="pt"><div class="pbox">
+  <h1 id="pt">Vyber si rasu</h1><p>Každá rasa má jiné bonusy, názvy jednotek a domovský svět.</p>
+  <label>Jméno velitele <input id="cmd" maxlength="20" placeholder="Velitel" autocomplete="off"></label>
+  <div id="cards"></div></div></div>
+<div id="battle" hidden role="dialog" aria-modal="true"><div class="bbox"><h2 id="b-title"></h2>
+<small>Tvá flotila</small><div class="bar"><i id="b-a"></i></div><small>Obránci</small><div class="bar"><i id="b-d"></i></div>
+<div id="b-res"></div><button class="go" id="b-close">Zavřít hlášení</button></div></div>
+<script src="game.js" defer></script>
+</body>
+</html>
