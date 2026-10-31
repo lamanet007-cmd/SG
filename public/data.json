@@ -1,0 +1,1053 @@
+{
+ "TY": {
+  "des": {
+   "n": "Pouštní",
+   "c": [
+    "#f0cd8a",
+    "#8a5a24"
+   ],
+   "m": [
+    1.25,
+    1
+   ]
+  },
+  "ice": {
+   "n": "Ledová",
+   "c": [
+    "#eaf8ff",
+    "#5f93b8"
+   ],
+   "m": [
+    1,
+    1.25
+   ]
+  },
+  "jun": {
+   "n": "Džunglová",
+   "c": [
+    "#8fe08a",
+    "#245f33"
+   ],
+   "m": [
+    1.1,
+    1.1
+   ]
+  },
+  "vol": {
+   "n": "Sopečná",
+   "c": [
+    "#ffa95a",
+    "#5e170c"
+   ],
+   "m": [
+    1.5,
+    0.8
+   ]
+  },
+  "oce": {
+   "n": "Oceánská",
+   "c": [
+    "#7fcfff",
+    "#1a4585"
+   ],
+   "m": [
+    0.9,
+    1.4
+   ]
+  },
+  "gas": {
+   "n": "Plynný obr",
+   "c": [
+    "#ecd2a6",
+    "#8a5a3a"
+   ],
+   "m": [
+    1.5,
+    0.7
+   ]
+  }
+ },
+ "SYS": [
+  "Sol",
+  "TRAPPIST-1",
+  "Kepler-186",
+  "Kepler-62",
+  "Gliese 581",
+  "55 Cancri",
+  "HD 40307",
+  "Gliese 667 C",
+  "Kepler-11",
+  "Kepler-20",
+  "HD 10180",
+  "Kepler-444"
+ ],
+ "B": {
+  "naq": {
+   "n": "Důl na naquadah",
+   "d": "Těží naquadah na této planetě.",
+   "c": [
+    50,
+    60
+   ],
+   "f": 1.6
+  },
+  "tri": {
+   "n": "Důl na trinium",
+   "d": "Těží trinium na této planetě.",
+   "c": [
+    110,
+    30
+   ],
+   "f": 1.6
+  },
+  "reak": {
+   "n": "Naquadahový reaktor",
+   "d": "Energie pro doly na této planetě.",
+   "c": [
+    90,
+    90
+   ],
+   "f": 1.7
+  },
+  "def": {
+   "n": "Obranná platforma",
+   "d": "+25 obrany planety za úroveň.",
+   "c": [
+    40,
+    150
+   ],
+   "f": 1.7
+  },
+  "shd": {
+   "n": "Planetární štít",
+   "d": "+15 % obrany planety za úroveň.",
+   "c": [
+    150,
+    350
+   ],
+   "f": 1.9,
+   "req": {
+    "r": {
+     "stit": 2
+    }
+   }
+  }
+ },
+ "G": {
+  "lab": {
+   "n": "Laboratoř Dr. Carterové",
+   "d": "Odemyká výzkum.",
+   "c": [
+    100,
+    220
+   ],
+   "f": 1.8
+  },
+  "han": {
+   "n": "Hangár",
+   "d": "Odemyká letouny a lodě, vyšší úroveň silnější typy.",
+   "c": [
+    260,
+    120
+   ],
+   "f": 1.8
+  },
+  "kas": {
+   "n": "Kasárna",
+   "d": "Úroveň 2 odemyká elitní jednotky.",
+   "c": [
+    160,
+    50
+   ],
+   "f": 1.7
+  },
+  "dip": {
+   "n": "Diplomatická kancelář",
+   "d": "Úroveň = nejvýše tolik spojenců v koalici (max. 3).",
+   "c": [
+    220,
+    320
+   ],
+   "f": 2
+  }
+ },
+ "R": {
+  "zbr": {
+   "n": "Zbraně",
+   "d": "+10 % síla útoku za úroveň.",
+   "c": [
+    150,
+    300
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "stit": {
+   "n": "Štíty a iris",
+   "d": "Ztráty o 8 % nižší za úroveň.",
+   "c": [
+    300,
+    180
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "poh": {
+   "n": "Hyperprostorový pohon",
+   "d": "Cesty bránou o 15 % kratší za úroveň.",
+   "c": [
+    220,
+    380
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "kol": {
+   "n": "Astrofyzika",
+   "d": "+1 kolonie za úroveň.",
+   "c": [
+    350,
+    250
+   ],
+   "f": 2.2,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "ener": {
+   "n": "Energetika",
+   "d": "+10 % energie z reaktorů za úroveň.",
+   "c": [
+    200,
+    300
+   ],
+   "f": 1.8,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "tez": {
+   "n": "Těžební technologie",
+   "d": "+8 % těžba za úroveň.",
+   "c": [
+    300,
+    150
+   ],
+   "f": 1.8,
+   "req": {
+    "g": {
+     "lab": 1
+    }
+   }
+  },
+  "zat": {
+   "n": "Zat'nik'tel",
+   "d": "Odemyká elitní jednotky.",
+   "c": [
+    550,
+    300
+   ],
+   "f": 2,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "zbr": 2
+    }
+   }
+  },
+  "mat": {
+   "n": "Trinium-naquadahová slitina",
+   "d": "Odemyká křižníky a vlajkové lodě.",
+   "c": [
+    400,
+    650
+   ],
+   "f": 2,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "tez": 2
+    }
+   }
+  },
+  "obr": {
+   "n": "Obranné systémy",
+   "d": "+10 % obrana planet za úroveň.",
+   "c": [
+    300,
+    450
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 2
+    },
+    "r": {
+     "stit": 1
+    }
+   }
+  },
+  "ter": {
+   "n": "Terraformace",
+   "d": "+2 pole k zastavění na každé planetě za úroveň.",
+   "c": [
+    350,
+    450
+   ],
+   "f": 1.9,
+   "req": {
+    "g": {
+     "lab": 2
+    }
+   }
+  }
+ },
+ "RACES": {
+  "tauri": {
+   "n": "Tau'ri",
+   "d": "Lidé ze Země. Vynalézaví a dobře vyzbrojení.",
+   "c": [
+    "#4fb6ff",
+    "#1f4f8f"
+   ],
+   "home": "Země",
+   "bonus": "+10 % síla všech jednotek",
+   "eff": {
+    "atk": 1.1
+   },
+   "ally": {
+    "atk": 1.05
+   },
+   "allyT": "+5 % síla útoku",
+   "u": [
+    "Tým SG",
+    "Speciální jednotky",
+    "F-302",
+    "Daedalus",
+    "Odyssey",
+    "Tel'tak"
+   ],
+   "gr": 80,
+   "ex": 1,
+   "hk": [
+    0,
+    2
+   ],
+   "ht": "oce"
+  },
+  "jaffa": {
+   "n": "Jaffa",
+   "d": "Hrdí bojovníci, kteří se vzbouřili proti Goa'uldům.",
+   "c": [
+    "#e8b04a",
+    "#7a4a12"
+   ],
+   "home": "Chulak",
+   "bonus": "+30 % síla pěchoty, pěchota o 25 % levnější",
+   "eff": {
+    "inf": 1.3,
+    "ucost": 0.75
+   },
+   "ally": {
+    "inf": 1.15
+   },
+   "allyT": "+15 % síla pěchoty",
+   "u": [
+    "Jaffský válečník",
+    "Elitní Jaffa",
+    "Death Glider",
+    "Ha'tak",
+    "Mateřská loď",
+    "Al'kesh"
+   ],
+   "gr": 90,
+   "ex": 1.1,
+   "hk": [
+    2,
+    1
+   ],
+   "ht": "des"
+  },
+  "tokra": {
+   "n": "Tok'ra",
+   "d": "Tajní odbojáři. Skrývají se a brání se chytře.",
+   "c": [
+    "#6fe0b0",
+    "#1c6a52"
+   ],
+   "home": "Vorash",
+   "bonus": "+30 % obrana planet, výzkum o 15 % levnější",
+   "eff": {
+    "def": 1.3,
+    "res": 0.85
+   },
+   "ally": {
+    "def": 1.15
+   },
+   "allyT": "+15 % obrana planet",
+   "u": [
+    "Agent Tok'ra",
+    "Elitní agent",
+    "Tok'ra stíhač",
+    "Tok'ra křižník",
+    "Tok'ra Ha'tak",
+    "Tok'ra transportér"
+   ],
+   "gr": 60,
+   "ex": 0.8,
+   "hk": [
+    7,
+    2
+   ],
+   "ht": "jun"
+  },
+  "asgard": {
+   "n": "Asgardi",
+   "d": "Pokročilá rasa vědců. Slabší v boji, silná v technologiích.",
+   "c": [
+    "#c8d4e0",
+    "#5a6b80"
+   ],
+   "home": "Orilla",
+   "bonus": "+20 % těžba, výzkum o 25 % levnější, −10 % síla",
+   "eff": {
+    "prod": 1.2,
+    "res": 0.75,
+    "atk": 0.9
+   },
+   "ally": {
+    "res": 0.9,
+    "prod": 1.05
+   },
+   "allyT": "výzkum −10 % ceny, +5 % těžba",
+   "u": [
+    "Asgardský strážce",
+    "Asgardský operativec",
+    "Asgardský stíhač",
+    "Beliskner",
+    "Beliskner O'Neill",
+    "Asgardský transportér"
+   ],
+   "gr": 50,
+   "ex": 1.3,
+   "hk": [
+    4,
+    1
+   ],
+   "ht": "ice"
+  },
+  "lantean": {
+   "n": "Lanteané",
+   "d": "Potomci Antiků z Atlantidy. Chytrá obrana a rychlý výzkum.",
+   "c": [
+    "#7fe3ff",
+    "#2a5f9a"
+   ],
+   "home": "Atlantida",
+   "bonus": "+15 % obrana planet, výzkum o 20 % levnější",
+   "eff": {
+    "def": 1.15,
+    "res": 0.8
+   },
+   "ally": {
+    "def": 1.1,
+    "res": 0.95
+   },
+   "allyT": "+10 % obrana, výzkum −5 % ceny",
+   "gr": 70,
+   "ex": 0.9,
+   "u": [
+    "Lanteanský voják",
+    "Elitní voják z Atlantidy",
+    "Jumper",
+    "Aurora",
+    "Atlantis (městská loď)",
+    "Jumper-transportér"
+   ],
+   "hk": [
+    11,
+    2
+   ],
+   "ht": "oce"
+  },
+  "wraith": {
+   "n": "Wraithové",
+   "d": "Predátoři z galaxie Pegasus. Silní útočníci, křehká obrana.",
+   "c": [
+    "#b58cff",
+    "#4a2a7a"
+   ],
+   "home": "Hive Alfa",
+   "bonus": "+15 % síla jednotek, −10 % obrana planet",
+   "eff": {
+    "atk": 1.15,
+    "def": 0.9
+   },
+   "ally": {
+    "atk": 1.08
+   },
+   "allyT": "+8 % síla útoku",
+   "gr": 100,
+   "ex": 1.2,
+   "u": [
+    "Wraithský válečník",
+    "Wraithský důstojník",
+    "Dart",
+    "Wraithský křižník",
+    "Hive",
+    "Wraithský transportér"
+   ],
+   "hk": [
+    8,
+    1
+   ],
+   "ht": "vol"
+  },
+  "replik": {
+   "n": "Replikátoři",
+   "d": "Sebereplikující se stroje. Levná výroba a rychlé šíření.",
+   "c": [
+    "#9aa8b8",
+    "#3a4654"
+   ],
+   "home": "Asuran",
+   "bonus": "+15 % těžba, jednotky o 20 % levnější, −5 % síla",
+   "eff": {
+    "prod": 1.15,
+    "ucost": 0.8,
+    "atk": 0.95
+   },
+   "ally": {
+    "prod": 1.08
+   },
+   "allyT": "+8 % těžba",
+   "gr": 90,
+   "ex": 1.5,
+   "u": [
+    "Replikátor",
+    "Replikátor v lidské podobě",
+    "Replikátorská stíhačka",
+    "Replikátorský křižník",
+    "Replikátorská loď",
+    "Replikátorský kolonizátor"
+   ],
+   "hk": [
+    9,
+    2
+   ],
+   "ht": "des"
+  }
+ },
+ "UN": {
+  "inf": {
+   "d": "Základní pěchota.",
+   "c": [
+    30,
+    20
+   ],
+   "atk": 5
+  },
+  "elite": {
+   "d": "Elitní bojovníci s pokročilou výzbrojí.",
+   "c": [
+    120,
+    50
+   ],
+   "atk": 16,
+   "req": {
+    "g": {
+     "kas": 2
+    },
+    "r": {
+     "zat": 1
+    }
+   }
+  },
+  "ftr": {
+   "d": "Rychlé stíhače pro boj ve vzduchu i v kosmu.",
+   "c": [
+    90,
+    140
+   ],
+   "atk": 20,
+   "req": {
+    "g": {
+     "han": 1
+    },
+    "r": {
+     "zbr": 1
+    }
+   }
+  },
+  "crs": {
+   "d": "Bitevní křižník, páteř flotily.",
+   "c": [
+    700,
+    900
+   ],
+   "atk": 130,
+   "req": {
+    "g": {
+     "han": 3
+    },
+    "r": {
+     "zbr": 3,
+     "stit": 2,
+     "mat": 1
+    }
+   }
+  },
+  "flg": {
+   "d": "Vlajková loď. Rozdrtí i nejsilnější obranu.",
+   "c": [
+    3000,
+    4200
+   ],
+   "atk": 520,
+   "req": {
+    "g": {
+     "han": 5
+    },
+    "r": {
+     "zbr": 5,
+     "stit": 4,
+     "ener": 3,
+     "mat": 3
+    }
+   }
+  },
+  "col": {
+   "d": "Kolonizační loď, veze osadníky na volnou planetu.",
+   "c": [
+    450,
+    250
+   ],
+   "atk": 0,
+   "req": {
+    "g": {
+     "han": 1
+    }
+   }
+  }
+ },
+ "GOA": {
+  "n": "Goa'uldi",
+  "ruler": "Anubis",
+  "c": [
+   "#e0705a",
+   "#6a1a10"
+  ],
+  "gr": 100,
+  "ex": 1.1,
+  "hk": [
+   10,
+   3
+  ],
+  "ht": "vol",
+  "home": "Netu"
+ },
+ "HT": {
+  "atk": {
+   "n": "Útok",
+   "v": 0.04,
+   "u": "síla útoku"
+  },
+  "def": {
+   "n": "Obrana",
+   "v": 0.04,
+   "u": "obrana planet"
+  },
+  "eco": {
+   "n": "Ekonomika",
+   "v": 0.03,
+   "u": "těžba surovin"
+  },
+  "res": {
+   "n": "Věda",
+   "v": 0.02,
+   "u": "sleva na výzkum"
+  },
+  "spd": {
+   "n": "Rychlost",
+   "v": 0.03,
+   "u": "kratší cesty flotil"
+  },
+  "loot": {
+   "n": "Kořist",
+   "v": 0.05,
+   "u": "větší kořist z bitev"
+  }
+ },
+ "HEROES": {
+  "oneill": {
+   "n": "Jack O'Neill",
+   "r": "tauri",
+   "t": "atk",
+   "d": "Zkušený generál, který vede útoky s klidem a suchým humorem.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "carter": {
+   "n": "Samantha Carter",
+   "r": "tauri",
+   "t": "res",
+   "d": "Vědkyně a inženýrka, která urychluje každý výzkum.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "hammond": {
+   "n": "George Hammond",
+   "r": "tauri",
+   "t": "def",
+   "d": "Rozvážný velitel základny, jeho plány drží obranu pohromadě.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "jackson": {
+   "n": "Daniel Jackson",
+   "r": "tauri",
+   "t": "eco",
+   "d": "Archeolog a lingvista, jeho objevy a obchody plní sklady.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "tealc": {
+   "n": "Teal'c",
+   "r": "jaffa",
+   "t": "atk",
+   "d": "Věhlasný válečník, jehož příklad žene jednotky do boje.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "bratac": {
+   "n": "Bra'tac",
+   "r": "jaffa",
+   "t": "def",
+   "d": "Starý mistr taktiky, který naučí posádky držet pozice.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "ishta": {
+   "n": "Ishta",
+   "r": "jaffa",
+   "t": "loot",
+   "d": "Obratná velitelka lovců, z nájezdů si přináší bohatou kořist.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "gerak": {
+   "n": "Gerak",
+   "r": "jaffa",
+   "t": "eco",
+   "d": "Organizátor odboje, který dokáže zásobit celou armádu.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "selmak": {
+   "n": "Selmak",
+   "r": "tokra",
+   "t": "def",
+   "d": "Moudrý diplomat a stratég, bránící planety chytře a včas.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "lantash": {
+   "n": "Lantash",
+   "r": "tokra",
+   "t": "atk",
+   "d": "Odvážný agent, specialista na rychlé a tvrdé údery.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "garshaw": {
+   "n": "Garshaw",
+   "r": "tokra",
+   "t": "eco",
+   "d": "Vůdkyně Vysoké rady, dobrá správkyně zdrojů.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "anise": {
+   "n": "Anise",
+   "r": "tokra",
+   "t": "res",
+   "d": "Brilantní badatelka, která vyvíjí nové technologie.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "thor": {
+   "n": "Thor",
+   "r": "asgard",
+   "t": "atk",
+   "d": "Vrchní velitel flotily, jeho lodě udeří přesně a včas.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "heimdall": {
+   "n": "Heimdall",
+   "r": "asgard",
+   "t": "def",
+   "d": "Strážce, který vidí hrozbu dříve, než dorazí.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "hermiod": {
+   "n": "Hermiod",
+   "r": "asgard",
+   "t": "res",
+   "d": "Geniální technik, který zkracuje vývoj nových systémů.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "penegal": {
+   "n": "Penegal",
+   "r": "asgard",
+   "t": "eco",
+   "d": "Správce kolonií, který zvyšuje výnos z planet.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "sheppard": {
+   "n": "John Sheppard",
+   "r": "lantean",
+   "t": "atk",
+   "d": "Pilot s citem pro riskantní manévry a rychlá rozhodnutí.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "mckay": {
+   "n": "Rodney McKay",
+   "r": "lantean",
+   "t": "res",
+   "d": "Hlavní vědec expedice, na každý problém má řešení.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "weir": {
+   "n": "Elizabeth Weir",
+   "r": "lantean",
+   "t": "eco",
+   "d": "Vůdkyně expedice, která dokáže zorganizovat zásobování.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "ronon": {
+   "n": "Ronon Dex",
+   "r": "lantean",
+   "t": "def",
+   "d": "Nezlomný bojovník, který chrání koloniální planety.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "todd": {
+   "n": "Todd",
+   "r": "wraith",
+   "t": "spd",
+   "d": "Prohnaný zvěd, který najde nejkratší cestu.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "michael": {
+   "n": "Michael",
+   "r": "wraith",
+   "t": "atk",
+   "d": "Bojovník s nelítostným způsobem boje.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "kralovna": {
+   "n": "Wraithská královna",
+   "r": "wraith",
+   "t": "def",
+   "d": "Vládkyně úlu, před její mocí se drží i okolní hnízda.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "fifth": {
+   "n": "Fifth",
+   "r": "replik",
+   "t": "atk",
+   "d": "Chytrý replikátor, který ví, kam zaútočit.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "replicarter": {
+   "n": "Replicarter",
+   "r": "replik",
+   "t": "res",
+   "d": "Replikátor se schopností rychle vymyslet nové technologie.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "reese": {
+   "n": "Reese",
+   "r": "replik",
+   "t": "eco",
+   "d": "Replikátorka, jejíž cit pro stavbu zrychluje těžbu.",
+   "c": [
+    500,
+    500
+   ]
+  },
+  "niam": {
+   "n": "Niam",
+   "r": "replik",
+   "t": "def",
+   "d": "Obranný stratég, který staví neprostupné linie.",
+   "c": [
+    500,
+    500
+   ]
+  }
+ },
+ "PLN": [
+  null,
+  [
+   "TRAPPIST-1 b",
+   "TRAPPIST-1 c",
+   "TRAPPIST-1 d",
+   "TRAPPIST-1 e",
+   "TRAPPIST-1 f"
+  ],
+  [
+   "Kepler-186 b",
+   "Kepler-186 c",
+   "Kepler-186 d",
+   "Kepler-186 e",
+   "Kepler-186 f"
+  ],
+  [
+   "Kepler-62 b",
+   "Kepler-62 c",
+   "Kepler-62 d",
+   "Kepler-62 e",
+   "Kepler-62 f"
+  ],
+  [
+   "Gliese 581 b",
+   "Gliese 581 c",
+   "Gliese 581 d",
+   "Gliese 581 e",
+   "Gliese 581 g"
+  ],
+  [
+   "55 Cancri e",
+   "55 Cancri b",
+   "55 Cancri c",
+   "55 Cancri f",
+   "55 Cancri d"
+  ],
+  [
+   "HD 40307 b",
+   "HD 40307 c",
+   "HD 40307 d",
+   "HD 40307 f",
+   "HD 40307 g"
+  ],
+  [
+   "Gliese 667 C b",
+   "Gliese 667 C c",
+   "Gliese 667 C e",
+   "Gliese 667 C f",
+   "Gliese 667 C h"
+  ],
+  [
+   "Kepler-11 b",
+   "Kepler-11 c",
+   "Kepler-11 d",
+   "Kepler-11 e",
+   "Kepler-11 f"
+  ],
+  [
+   "Kepler-20 b",
+   "Kepler-20 c",
+   "Kepler-20 d",
+   "Kepler-20 e",
+   "Kepler-20 f"
+  ],
+  [
+   "HD 10180 c",
+   "HD 10180 d",
+   "HD 10180 e",
+   "HD 10180 f",
+   "HD 10180 g"
+  ],
+  [
+   "Kepler-444 b",
+   "Kepler-444 c",
+   "Kepler-444 d",
+   "Kepler-444 e",
+   "Kepler-444 f"
+  ]
+ ]
+}
