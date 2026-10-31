@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stargate: Velení SGC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1014;--panel:#171c22;--steel:#2a323b;--line:#3b4652;--gold:#c9a24b;--gold2:#e8cf8a;--blue:#4fb6ff;--blue2:#bfe8ff;--txt:#dfe6ec;--mut:#8b98a5;--red:#d9604a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#1c2733,var(--bg));color:var(--txt);font:16px/1.5 Barlow,system-ui,sans-serif;min-height:100vh}
+h1,h2{font-family:Cinzel,Georgia,serif;margin:0;letter-spacing:.04em}
+header{display:flex;flex-direction:column;align-items:center;padding:20px 12px 4px}
+header h1{font-size:clamp(22px,5vw,38px);color:var(--gold2)}
+header p{margin:2px 0 0;color:var(--mut);font-size:14px}
+#gate{width:min(300px,70vw);margin:10px auto 0;display:block}
+#ring{transform-origin:200px 200px;transition:transform 4s cubic-bezier(.6,0,.3,1)}
+.chev{fill:#5a3a2a;stroke:var(--gold);stroke-width:2;transition:fill .3s}
+.chev.on{fill:#ff7a2e;filter:drop-shadow(0 0 6px #ff7a2e)}
+#horizon{opacity:.0;transition:opacity .6s}
+#gate.open #horizon{opacity:1;animation:swirl 3s linear infinite;transform-origin:200px 200px}
+@keyframes swirl{to{transform:rotate(360deg)}}
+.res{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px;position:sticky;top:0;background:#0d1014ee;backdrop-filter:blur(6px);z-index:5;border-bottom:1px solid var(--line)}
+.res div{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);padding:4px 12px;border-radius:3px;min-width:104px}
+.res small{display:block;color:var(--mut);font-size:12px}
+.res b{font-variant-numeric:tabular-nums}
+nav{display:flex;justify-content:center;gap:4px;padding:12px 8px 0;flex-wrap:wrap}
+nav button{font:600 15px Barlow;background:var(--steel);color:var(--txt);border:1px solid var(--line);padding:9px 16px;border-radius:3px 3px 0 0;cursor:pointer}
+nav button.act{background:var(--gold);color:#1a1405;border-color:var(--gold)}
+main{max-width:860px;margin:0 auto;padding:0 12px 40px}
+.tab{display:none;background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:0 0 4px 4px}
+.tab.act{display:block}
+.row{display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row h2{font-size:17px;color:var(--gold2)}
+.row p{margin:2px 0;color:var(--mut);font-size:14px}
+.cost{font-size:13px;color:var(--blue2)}
+button.go{font:600 14px Barlow;background:transparent;color:var(--blue);border:1.5px solid var(--blue);padding:8px 14px;border-radius:3px;cursor:pointer;min-width:96px}
+button.go:hover:not(:disabled){background:var(--blue);color:#06141f}
+button.go:disabled{opacity:.35;cursor:not-allowed;border-color:var(--line);color:var(--mut)}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.bad{color:var(--red)}
+#log{margin-top:14px;max-height:170px;overflow:auto;font-size:14px;background:#0a0d11;border:1px solid var(--line);padding:8px 12px;border-radius:3px}
+#log div{padding:2px 0;border-bottom:1px dotted var(--steel)}
+#log .w{color:#7ddc8c}#log .l{color:var(--red)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:0 12px 24px}
+footer button{background:none;border:0;color:var(--mut);text-decoration:underline;cursor:pointer;font:inherit}
+@media (prefers-reduced-motion:reduce){#gate.open #horizon{animation:none}#ring{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Stargate: Velení SGC</h1>
+  <p>Základna Cheyenne Mountain. Postav ekonomiku, vyšli týmy bránou a vzdoruj Goa'uldům.</p>
+  <svg id="gate" viewBox="0 0 400 400" role="img" aria-label="Hvězdná brána">
+    <defs>
+      <radialGradient id="eh"><stop offset="0" stop-color="#e8f8ff"/><stop offset=".45" stop-color="#6cc4ff"/><stop offset="1" stop-color="#1f6fb8"/></radialGradient>
+      <radialGradient id="metal"><stop offset=".78" stop-color="#4a5560"/><stop offset=".9" stop-color="#2a323b"/><stop offset="1" stop-color="#1a2027"/></radialGradient>
+    </defs>
+    <g id="horizon"><circle cx="200" cy="200" r="138" fill="url(#eh)"/>
+      <path d="M200 70a130 130 0 0 1 90 40M330 200a130 130 0 0 1-40 90M200 330a130 130 0 0 1-90-40M70 200a130 130 0 0 1 40-90" stroke="#fff" stroke-opacity=".6" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="200" cy="200" r="60" fill="#e8f8ff" fill-opacity=".35"/></g>
+    <g id="ring"><circle cx="200" cy="200" r="190" fill="url(#metal)" stroke="#0e1216" stroke-width="3"/>
+      <circle cx="200" cy="200" r="140" fill="#0d1014" stroke="#5c6975" stroke-width="3"/>
+      <g id="glyphs" fill="none" stroke="var(--gold)" stroke-width="2"></g></g>
+    <g id="chevs"></g>
+  </svg>
+</header>
+
+<div class="res" aria-live="off">
+  <div><small>Naquadah</small><b id="r-n">0</b> <small id="p-n" style="display:inline"></small></div>
+  <div><small>Trinium</small><b id="r-t">0</b> <small id="p-t" style="display:inline"></small></div>
+  <div><small>Energie</small><b id="r-e">0</b></div>
+</div>
+
+<nav role="tablist">
+  <button data-t="base" class="act">Základna</button>
+  <button data-t="lab">Výzkum</button>
+  <button data-t="hangar">Hangár</button>
+  <button data-t="gate">Brána</button>
+</nav>
+
+<main>
+  <section class="tab act" id="base"></section>
+  <section class="tab" id="lab"></section>
+  <section class="tab" id="hangar"></section>
+  <section class="tab" id="gate-tab"></section>
+  <div id="log"></div>
+</main>
+<footer>Fanouškovská hra bez vazby na MGM. <button id="reset">Smazat postup</button></footer>
+
+<script>
+const $=s=>document.querySelector(s), fmt=n=>Math.floor(n).toLocaleString('cs-CZ');
+const B={
+ naq:{n:'Důl na naquadah',d:'Těží naquadah, základ všeho.',c:[60,30],f:1.6,rate:1.4},
+ tri:{n:'Důl na trinium',d:'Pevná slitina pro lodě a štíty.',c:[80,20],f:1.6,rate:0.9},
+ reak:{n:'Naquadahový reaktor',d:'Vyrábí energii pro doly a laboratoř.',c:[100,60],f:1.7,rate:3},
+ lab:{n:'Laboratoř Dr. Carterové',d:'Odemyká výzkum a zrychluje ho.',c:[150,120],f:1.8},
+ han:{n:'Hangár',d:'Odemyká výrobu F-302 a Daedalu.',c:[200,150],f:1.8}
+};
+const R={
+ zbr:{n:'Zbraně: zat a naquadahové hlavice',d:'+10 % síly útoku za úroveň.',c:[200,150],f:1.9},
+ stit:{n:'Štíty a iris',d:'Snižují ztráty jednotek o 8 % za úroveň.',c:[250,250],f:1.9},
+ poh:{n:'Hyperprostorový pohon',d:'Zkracuje cestu bránou o 15 % za úroveň.',c:[300,250],f:1.9}
+};
+const U={
+ sg:{n:'Tým SG',d:'Pěchota. Síla 5.',c:[40,10],atk:5,need:0},
+ f302:{n:'Stíhačka F-302',d:'Rychlý letoun. Síla 18.',c:[120,90],atk:18,need:1},
+ dae:{n:'Křižník Daedalus',d:'Bitevní loď třídy Daedalus. Síla 120.',c:[900,700],atk:120,need:3}
+};
+const W=[
+ {n:'Abydos',d:'Poušť, Ra už tu nevládne.',p:60,loot:[150,100]},
+ {n:'Chulak',d:'Domovský svět Jaffů, Teal\'c se vrací.',p:260,loot:[550,350]},
+ {n:'Tollana',d:'Domov Tollanů, ionové zbraně.',p:900,loot:[1600,1100]},
+ {n:'Langara',d:'Spojenec, ale s cizími loděmi nad hlavou.',p:2200,loot:[3600,2600]},
+ {n:'Dakara',d:'Ancientská zbraň a flotila Anubise.',p:6000,loot:[9500,7000]}
+];
+const fresh=()=>({n:300,t:200,e:0,b:{naq:1,tri:1,reak:1,lab:0,han:0},r:{zbr:0,stit:0,poh:0},u:{sg:5,f302:0,dae:0},w:W.map(x=>1),ts:Date.now()});
+let S=JSON.parse(localStorage.getItem('sgc')||'null')||fresh();
+const lvl=(o,k)=>o[k]||0, cost=(d,l)=>d.c.map(v=>Math.ceil(v*Math.pow(d.f,l)));
+function energy(){const prod=B.reak.rate*S.b.reak*Math.pow(1.1,S.b.reak),use=2*(S.b.naq+S.b.tri)+S.b.lab;return{prod,use,eff:use?Math.min(1,prod/use):1}}
+function rates(){const e=energy().eff;return{n:B.naq.rate*S.b.naq*Math.pow(1.12,S.b.naq)*e,t:B.tri.rate*S.b.tri*Math.pow(1.12,S.b.tri)*e}}
+function tick(){const now=Date.now(),dt=Math.min((now-S.ts)/1000,86400);S.ts=now;const r=rates();S.n+=r.n*dt;S.t+=r.t*dt;S.e=energy().prod-energy().use;draw()}
+const ok=c=>S.n>=c[0]&&S.t>=c[1], pay=c=>{S.n-=c[0];S.t-=c[1]};
+function log(m,c){const d=document.createElement('div');d.className=c||'';d.textContent=new Date().toLocaleTimeString('cs-CZ')+'  '+m;$('#log').prepend(d)}
+function rowHTML(k,d,l,c,btn,extra){return `<div class="row"><div><h2>${d.n} ${l!==null?'(úroveň '+l+')':''}</h2><p>${d.d}</p><span class="cost">Cena: ${fmt(c[0])} naquadah, ${fmt(c[1])} trinium${extra||''}</span></div><button class="go" data-k="${k}" ${ok(c)&&!btn.off?'':'disabled'}>${btn.t}</button></div>`}
+function draw(){
+ const r=rates(),en=energy();
+ $('#r-n').textContent=fmt(S.n);$('#r-t').textContent=fmt(S.t);$('#r-e').textContent=(en.prod-en.use).toFixed(1);
+ $('#p-n').textContent='+'+r.n.toFixed(1)+'/s';$('#p-t').textContent='+'+r.t.toFixed(1)+'/s';
+ $('#base').innerHTML=Object.keys(B).map(k=>rowHTML('b:'+k,B[k],S.b[k],cost(B[k],S.b[k]),{t:S.b[k]?'Vylepšit':'Postavit'})).join('')+(en.eff<1?`<p class="bad">Nedostatek energie: těžba běží na ${Math.round(en.eff*100)} %. Vylepši reaktor.</p>`:'');
+ const labOn=S.b.lab>0;
+ $('#lab').innerHTML=labOn?Object.keys(R).map(k=>rowHTML('r:'+k,R[k],S.r[k],cost(R[k],S.r[k]),{t:'Zkoumat'})).join(''):'<p>Nejdřív postav Laboratoř na záložce Základna.</p>';
+ $('#hangar').innerHTML=Object.keys(U).map(k=>{const d=U[k],c=d.c,off=S.b.han<d.need;return rowHTML('u:'+k,d,null,c,{t:off?'Hangár '+d.need:'Vyrobit',off},` &nbsp;Máš: ${S.u[k]}`)}).join('');
+ const atk=power();
+ $('#gate-tab').innerHTML=`<p>Celková síla tvé flotily: <b>${fmt(atk)}</b>. Vyšleš všechny jednotky najednou.</p>`+W.map((w,i)=>{const p=Math.round(w.p*S.w[i]);return `<div class="row"><div><h2>${w.n}</h2><p>${w.d}</p><span class="cost">Obrana: ${fmt(p)} · Kořist: ${fmt(w.loot[0])} naquadah, ${fmt(w.loot[1])} trinium</span></div><button class="go" data-k="m:${i}" ${atk>0&&!busy?'':'disabled'}>Vyslat</button></div>`}).join('');
+}
+let busy=false;
+const power=()=>Object.keys(U).reduce((a,k)=>a+S.u[k]*U[k].atk,0)*(1+.1*S.r.zbr);
+function mission(i){
+ if(busy)return;busy=true;const w=W[i];log('Brána se vytáčí: '+w.n+'…');
+ const secs=Math.max(3,8*Math.pow(.85,S.r.poh));
+ const g=$('#gate');$('#ring').style.transition='transform '+secs*.6+'s cubic-bezier(.6,0,.3,1)';$('#ring').style.transform='rotate('+(360+Math.random()*360)+'deg)';
+ [...document.querySelectorAll('.chev')].forEach((c,n)=>setTimeout(()=>c.classList.add('on'),n*secs*600/7));
+ setTimeout(()=>g.classList.add('open'),secs*600);
+ setTimeout(()=>{
+  const a=power(),d=w.p*S.w[i],sh=Math.max(.2,1-.08*S.r.stit);
+  if(a>=d){const loss=Math.min(.9,.5*d/a*sh);Object.keys(S.u).forEach(k=>S.u[k]-=Math.round(S.u[k]*loss));S.n+=w.loot[0];S.t+=w.loot[1];S.w[i]*=1.12;log(`Vítězství na ${w.n}! Kořist ${fmt(w.loot[0])}/${fmt(w.loot[1])}. Ztráty ${Math.round(loss*100)} %.`,'w')}
+  else{Object.keys(S.u).forEach(k=>S.u[k]-=Math.round(S.u[k]*.8*sh));log(`Porážka na ${w.n}. Tvá síla ${fmt(a)} nestačila na ${fmt(d)}.`,'l')}
+  g.classList.remove('open');document.querySelectorAll('.chev').forEach(c=>c.classList.remove('on'));$('#ring').style.transform='rotate(0deg)';busy=false;save();draw();
+ },secs*1000);
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('nav button');
+ if(t){document.querySelectorAll('nav button,.tab').forEach(x=>x.classList.remove('act'));t.classList.add('act');$('#'+(t.dataset.t==='gate'?'gate-tab':t.dataset.t)).classList.add('act');return}
+ const b=e.target.closest('button.go');if(!b)return;
+ const [typ,k]=b.dataset.k.split(':');
+ if(typ==='m')return mission(+k);
+ const d=({b:B,r:R,u:U})[typ][k];
+ if(typ==='u'){const c=d.c;if(!ok(c))return;pay(c);S.u[k]++;log('Vyrobeno: '+d.n)}
+ else{const o=typ==='b'?S.b:S.r,c=cost(d,o[k]);if(!ok(c))return;pay(c);o[k]++;log(d.n+' na úrovni '+o[k]+'.')}
+ save();draw();
+});
+$('#reset').onclick=()=>{if(confirm('Opravdu smazat veškerý postup?')){S=fresh();save();$('#log').innerHTML='';draw()}};
+function save(){try{localStorage.setItem('sgc',JSON.stringify(S))}catch(e){}}
+// brána: glyfy a chevrony
+(()=>{let g='';for(let i=0;i<39;i++){const a=i/39*2*Math.PI,x1=200+147*Math.sin(a),y1=200-147*Math.cos(a),x2=200+176*Math.sin(a),y2=200-176*Math.cos(a);g+=`<path d="M${x1} ${y1}L${x2} ${y2}"/><circle cx="${200+162*Math.sin(a)}" cy="${200-162*Math.cos(a)}" r="3" fill="var(--gold)" stroke="none"/>`}$('#glyphs').innerHTML=g;
+let c='';for(let i=0;i<9;i++){const a=(i*40+20)*Math.PI/180+Math.PI,x=200+183*Math.sin(a),y=200-183*Math.cos(a);c+=`<g transform="translate(${x} ${y}) rotate(${i*40+20+180})"><path class="chev" d="M-17 -15L17 -15L10 15L-10 15Z"/></g>`}$('#chevs').innerHTML=c})();
+tick();setInterval(tick,1000);setInterval(save,5000);
+</script>
+</body>
+</html>
