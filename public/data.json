@@ -89,7 +89,8 @@
     50,
     60
    ],
-   "f": 1.6
+   "f": 1.6,
+   "t": 15
   },
   "tri": {
    "n": "Důl na trinium",
@@ -98,7 +99,8 @@
     110,
     30
    ],
-   "f": 1.6
+   "f": 1.6,
+   "t": 15
   },
   "reak": {
    "n": "Naquadahový reaktor",
@@ -107,7 +109,8 @@
     90,
     90
    ],
-   "f": 1.7
+   "f": 1.7,
+   "t": 18
   },
   "def": {
    "n": "Obranná platforma",
@@ -116,7 +119,8 @@
     40,
     150
    ],
-   "f": 1.7
+   "f": 1.7,
+   "t": 25
   },
   "shd": {
    "n": "Planetární štít",
@@ -130,6 +134,42 @@
     "r": {
      "stit": 2
     }
+   },
+   "t": 40
+  },
+  "fac": {
+   "n": "Továrna",
+   "d": "+15 % rychlost stavby na planetě za úroveň. Každé 4 úrovně přidají stavební slot.",
+   "c": [
+    120,
+    100
+   ],
+   "f": 1.6,
+   "t": 30
+  },
+  "bar": {
+   "n": "Výcvikový tábor",
+   "d": "Postupně vycvičí posádku planety zdarma (1 za minutu na úroveň, nejvýše 10 na úroveň).",
+   "c": [
+    100,
+    70
+   ],
+   "f": 1.6,
+   "t": 30
+  },
+  "rsr": {
+   "n": "Výzkumná stanice",
+   "d": "+5 % rychlost výzkumu za úroveň (sčítá se ze všech planet).",
+   "c": [
+    150,
+    150
+   ],
+   "f": 1.7,
+   "t": 40,
+   "req": {
+    "g": {
+     "lab": 1
+    }
    }
   }
  },
@@ -141,7 +181,8 @@
     100,
     220
    ],
-   "f": 1.8
+   "f": 1.8,
+   "t": 40
   },
   "han": {
    "n": "Hangár",
@@ -150,7 +191,8 @@
     260,
     120
    ],
-   "f": 1.8
+   "f": 1.8,
+   "t": 45
   },
   "kas": {
    "n": "Kasárna",
@@ -159,7 +201,8 @@
     160,
     50
    ],
-   "f": 1.7
+   "f": 1.7,
+   "t": 30
   },
   "dip": {
    "n": "Diplomatická kancelář",
@@ -168,7 +211,18 @@
     220,
     320
    ],
-   "f": 2
+   "f": 2,
+   "t": 50
+  },
+  "eng": {
+   "n": "Stavební středisko",
+   "d": "+8 % rychlost všech staveb za úroveň. Každé 4 úrovně přidají slot pro stavby Velitelství.",
+   "c": [
+    140,
+    100
+   ],
+   "f": 1.7,
+   "t": 35
   }
  },
  "R": {
@@ -1255,5 +1309,286 @@
    "Kepler-444 e",
    "Kepler-444 f"
   ]
- ]
+ ],
+ "MS": [
+  {
+   "id": "kol",
+   "n": "Kolonizátor",
+   "d": "Zakládej nové kolonie.",
+   "cat": "Expanze",
+   "stat": "col",
+   "goals": [
+    1,
+    3,
+    6,
+    10
+   ],
+   "sp": "col",
+   "rt": "t"
+  },
+  {
+   "id": "imp",
+   "n": "Impérium",
+   "d": "Vlastni najednou co nejvíc planet.",
+   "cat": "Expanze",
+   "stat": "pl",
+   "goals": [
+    3,
+    5,
+    8,
+    12
+   ],
+   "sp": "col"
+  },
+  {
+   "id": "dob",
+   "n": "Dobyvatel",
+   "d": "Obsaď planety soupeřů.",
+   "cat": "Expanze",
+   "stat": "occ",
+   "goals": [
+    1,
+    3,
+    8,
+    20
+   ],
+   "sp": "inf",
+   "rt": "n"
+  },
+  {
+   "id": "win",
+   "n": "Vítěz bitev",
+   "d": "Vyhraj bitvy.",
+   "cat": "Válka",
+   "stat": "win",
+   "goals": [
+    1,
+    5,
+    15,
+    40
+   ],
+   "sp": "ftr"
+  },
+  {
+   "id": "obr",
+   "n": "Strážce",
+   "d": "Odraz útoky na své planety.",
+   "cat": "Válka",
+   "stat": "defd",
+   "goals": [
+    1,
+    5,
+    15,
+    40
+   ],
+   "sp": "inf"
+  },
+  {
+   "id": "sil",
+   "n": "Velká armáda",
+   "d": "Dosáhni síly flotily.",
+   "cat": "Válka",
+   "stat": "pow",
+   "goals": [
+    100,
+    500,
+    2500,
+    10000
+   ],
+   "sp": "ftr"
+  },
+  {
+   "id": "sta",
+   "n": "Stavitel",
+   "d": "Dokonči stavby.",
+   "cat": "Rozvoj",
+   "stat": "bld",
+   "goals": [
+    5,
+    20,
+    60,
+    150
+   ],
+   "sp": "bb"
+  },
+  {
+   "id": "vyz",
+   "n": "Badatel",
+   "d": "Dokonči výzkumy.",
+   "cat": "Rozvoj",
+   "stat": "rd",
+   "goals": [
+    3,
+    10,
+    30,
+    70
+   ],
+   "sp": "rb"
+  },
+  {
+   "id": "obj",
+   "n": "Průlomy",
+   "d": "Zažij průlomy ve výzkumu.",
+   "cat": "Rozvoj",
+   "stat": "brk",
+   "goals": [
+    1,
+    3,
+    8,
+    15
+   ],
+   "sp": "rb"
+  },
+  {
+   "id": "tec",
+   "n": "Technokrat",
+   "d": "Zvyšuj součet úrovní technologií.",
+   "cat": "Rozvoj",
+   "stat": "tl",
+   "goals": [
+    5,
+    20,
+    50,
+    100
+   ],
+   "sp": "hx"
+  },
+  {
+   "id": "tez",
+   "n": "Těžař",
+   "d": "Vytěž suroviny celkem.",
+   "cat": "Rozvoj",
+   "stat": "mined",
+   "goals": [
+    5000,
+    25000,
+    100000,
+    500000
+   ],
+   "sp": "bb",
+   "rt": "t"
+  },
+  {
+   "id": "zbr",
+   "n": "Zbrojíř",
+   "d": "Vyrob jednotky.",
+   "cat": "Rozvoj",
+   "stat": "unit",
+   "goals": [
+    25,
+    100,
+    400,
+    1500
+   ],
+   "sp": "inf"
+  },
+  {
+   "id": "dip",
+   "n": "Diplomat",
+   "d": "Měj spojence v koalici najednou.",
+   "cat": "Diplomacie",
+   "stat": "ally",
+   "goals": [
+    1,
+    2,
+    3
+   ],
+   "sp": "hx"
+  },
+  {
+   "id": "dar",
+   "n": "Mecenáš",
+   "d": "Pošli spojencům dary surovin.",
+   "cat": "Diplomacie",
+   "stat": "gift",
+   "goals": [
+    2000,
+    10000,
+    50000
+   ],
+   "sp": "hx"
+  },
+  {
+   "id": "mir",
+   "n": "Mírotvorce",
+   "d": "Uzavři mír s nepřáteli.",
+   "cat": "Diplomacie",
+   "stat": "peace",
+   "goals": [
+    1,
+    3,
+    8
+   ],
+   "sp": "col"
+  },
+  {
+   "id": "top",
+   "n": "Špička žebříčku",
+   "d": "Dosáhni dobrého pořadí (menší číslo je lepší).",
+   "cat": "Diplomacie",
+   "stat": "rk",
+   "goals": [
+    4,
+    2,
+    1
+   ],
+   "sp": "ftr",
+   "inv": true
+  },
+  {
+   "id": "hrn",
+   "n": "Družina",
+   "d": "Najmi hrdiny.",
+   "cat": "Hrdinové",
+   "stat": "hn",
+   "goals": [
+    1,
+    3,
+    5
+   ],
+   "sp": "hx"
+  },
+  {
+   "id": "hrd",
+   "n": "Legenda",
+   "d": "Vychovej hrdinu na vysokou úroveň.",
+   "cat": "Hrdinové",
+   "stat": "hlv",
+   "goals": [
+    3,
+    5,
+    8,
+    10
+   ],
+   "sp": "hx"
+  },
+  {
+   "id": "cas",
+   "n": "Veterán",
+   "d": "Přežij galaktické dny.",
+   "cat": "Čas",
+   "stat": "gd",
+   "goals": [
+    150,
+    600,
+    2500,
+    10000
+   ],
+   "sp": "bb"
+  },
+  {
+   "id": "zan",
+   "n": "Svědek dějin",
+   "d": "Zažij vznik nebo zánik říší.",
+   "cat": "Čas",
+   "stat": "ev",
+   "goals": [
+    1,
+    3,
+    8
+   ],
+   "sp": "hx"
+  }
+ ],
+ "ver": 15
 }
