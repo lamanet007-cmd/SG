@@ -1,7 +1,7 @@
 // Stargate: Galaktické velení. Herní data jsou v data.json.
-const VER='v14';globalThis.__sg=VER;
+const VER='v15';globalThis.__sg=VER;
 const $=s=>document.querySelector(s),fmt=n=>Math.floor(n).toLocaleString('cs-CZ');
-let TY,TK,SYS,PLN,GOA,B,G,R,UN,RACES,HEROES,HT,MS,SK=[];const GAL=[],ROLES=['inf','elite','ftr','crs','flg','col'],ATK=['inf','elite','ftr','crs','flg'];
+let DV,TY,TK,SYS,PLN,GOA,B,G,R,UN,RACES,HEROES,HT,MS,SK=[];const GAL=[],ROLES=['inf','elite','ftr','crs','flg','col'],ATK=['inf','elite','ftr','crs','flg'];
 function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const SOL=[['Merkur','des',12,'Nejmenší planeta, nejblíže ke hvězdě.'],['Venuše','vol',14,'Žhavá planeta ukrytá pod hustými mraky.'],['Země','oce',20,'Modrá planeta, domov lidstva.'],['Mars','des',16,'Rudá planeta s vyschlými řečišti.'],['Jupiter','gas',8,'Největší plynný obr, s bouří velkou jako celá planeta.'],['Saturn','gas',8,'Plynný obr s nápadným prstencem.'],['Uran','ice',10,'Ledový obr, který se valí po boku.'],['Neptun','ice',10,'Vzdálený ledový obr s ledovými bouřemi.']];
 function buildGalaxy(){const r=rng(2010);let key=0;
@@ -144,7 +144,7 @@ const fsc=f=>Math.round(cnt(f)*150+tb(f)*12+S.ai[f].army/4+(S.ai[f].tech||0)*20)
 const myScore=()=>Math.round(nPl()*150+Object.values(S.pl).reduce((a,p)=>a+sum(p.b),0)*12+sum(S.g)*20+sum(S.r)*25+myArmy()/4);
 const board=()=>[{n:S.cmd+' ('+RACES[S.race].n+')',s:myScore(),me:1,pl:nPl(),ar:myArmy()},...Object.keys(S.ai).map(f=>({n:fn(f)+(f=='goauld'?' (vládce '+GOA.ruler+')':' (AI)'),f,s:fsc(f),pl:cnt(f),ar:S.ai[f].army,ally:S.co.includes(f),c:fc(f),p:PERS[S.ai[f].p],t:S.ai[f].tech||0}))].sort((a,b)=>b.s-a.s);
 // ---- tick, flotily, bitvy ----
-function tick(){if(!S.race)return;const now=Date.now(),dt=Math.min((now-S.ts)/1000,86400);S.ts=now;const r=rates();S.n+=r.n*dt;S.t+=r.t*dt;heroes().forEach(id=>addXp(id,dt*.25));for(const k in S.pl){const p=S.pl[k],br=p.b.bar||0;if(br>0){p.gx=(p.gx||0)+dt*br*(p.sp=='mil'?2:1)/60;const cap=br*10;if(p.gx>cap)p.gx=cap;while(p.gx>=1){p.gx--;if(p.gar<cap)p.gar++}}}xp('eco',(r.n+r.t)*dt*.03);aiStep();
+function tick(){if(!S.race)return;const now=Date.now(),dt=Math.min((now-S.ts)/1000,86400);S.ts=now;const r=rates();S.n+=r.n*dt;S.t+=r.t*dt;st('mined',(r.n+r.t)*dt);heroes().forEach(id=>addXp(id,dt*.25));for(const k in S.pl){const p=S.pl[k],br=p.b.bar||0;if(br>0){p.gx=(p.gx||0)+dt*br*(p.sp=='mil'?2:1)/60;const cap=br*10;if(p.gx>cap)p.gx=cap;while(p.gx>=1){p.gx--;if(p.gar<cap)p.gar++}}}xp('eco',(r.n+r.t)*dt*.03);aiStep();
  S.fl=S.fl.filter(f=>{if(f.ph==0&&now>=f.arr){arrive(f);f.ph=1}if(f.ph==1&&now>=f.back){for(const k in f.u)S.u[k]+=f.u[k];log('Flotila se vrátila domů.');return false}return true});
  buildTick();researchTick();if(nPl()>=3)disc('anc','Při osidlování nových světů jsi našel artefakty dávné civilizace. Odemkla se větev Ancientské artefakty.');if(S.race=='replik')S.disc.rep=1;checkExtinct();msUpdate();draw();dyn()}
 function launch(t,k){const g=GAL[k],o=S.own[k];let u={};
@@ -252,7 +252,7 @@ const plSum=k=>Object.values(S.pl).reduce((a,p)=>a+(p.b[k]||0),0),plSp=k=>Object
 const BRN={mil:'Vojenství',def:'Obrana',eco:'Ekonomika',exp:'Expanze a pohon',sci:'Věda a strategie',dis:'Objevy'};
 const DOC={att:['Útočná doktrína','+12 % síla útoku, −5 % obrana'],def:['Obranná doktrína','+15 % obrana, −5 % síla útoku'],eco:['Hospodářská doktrína','+10 % těžba, −5 % ceny staveb'],sci:['Vědecká doktrína','−10 % cena výzkumu, +25 % rychlost']};
 const dm=k=>{const m=({att:{atk:1.12,def:.95},def:{def:1.15,atk:.95},eco:{prod:1.1},sci:{res:.9}})[S.doc];return(m&&m[k])||1},bcm=()=>Math.pow(.97,S.r.rec||0)*(S.doc=='eco'?.95:1);
-const rspeed=()=>(1+.2*S.g.lab)*(1+.1*(S.r.met||0))*(S.doc=='sci'?1.25:1)*(1+.05*plSum('rsr'))*(1+.1*Math.min(3,plSp('sci')))*(1+.003*(S.medals||0))/Math.sqrt(hm('res')),rdur=k=>Math.max(5,Math.round(R[k].t*Math.pow(1.5,S.r[k]||0)/rspeed())),rslots=()=>1+Math.floor(S.g.lab/4);
+const rspeed=()=>(1+.2*S.g.lab)*(1+.1*(S.r.met||0))*(S.doc=='sci'?1.25:1)*(1+.05*plSum('rsr'))*(1+.1*Math.min(3,plSp('sci')))*(1+.003*(S.medals||0))/Math.sqrt(hm('res')),rdur=k=>Math.max(5,Math.round((R[k].t||60)*Math.pow(1.5,S.r[k]||0)/rspeed())),rslots=()=>1+Math.floor(S.g.lab/4);
 function disc(k,m){if(!S.disc||S.disc[k])return;S.disc[k]=1;log(m,'w');news(m)}
 function startR(k){const d=R[k],l=S.r[k]||0,c=cost(d,l,eff('res'));if(!reqOK(d.req)||(d.br=='dis'&&!S.disc[k])||l>=(d.max||10)||S.rq.some(p=>p.k==k)||S.rq.length>=rslots()||!ok(c))return;pay(c);const now=Date.now(),du=rdur(k)*1000;S.rq.push({k,s:now,e:now+du,c});log(`Zahájen výzkum: ${d.n} (úr. ${l+1}), potrvá ${fmtT(du/1000)}.`)}
 function finishR(p){const d=R[p.k];S.r[p.k]=(S.r[p.k]||0)+1;S.rq=S.rq.filter(x=>x!==p);log(`Výzkum dokončen: ${d.n} (úr. ${S.r[p.k]}).`,'w');xp('res',60);st('rd');
@@ -274,21 +274,22 @@ function tLab(){if(!S.g.lab)return '<p>Nejdřív postav Laboratoř na záložce 
 function row(key,d,l,c,t,off,extra,req){const rq=reqOK(req),can=ok(c)&&!off&&rq,k=key.split(':')[1];return `<div class="row"><div class="rh">${ic(k)}<div><h3>${d.n}${l!==null?` <span class="lv">úr. ${l}</span>`:''}</h3><p>${d.d}</p><span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}${extra||''}</span>${rq?(off?`<p class="bad">${off}</p>`:`<p class="eta" data-c="${c[0]},${c[1]}"></p>`):`<p class="bad">Vyžaduje: ${reqTx(req)}</p>`}</div></div><div class="bt"><button class="go" data-k="${key}" ${can?'':'disabled'}>${t}</button>${l&&(key[0]=='b'||key[0]=='q')?`<button class="go dm" data-k="d${key}">Zbourat</button>`:''}</div></div>`}
 const newsHTML=()=>`<h2>Zprávy z galaxie</h2>`+(S.news.length?S.news.map(n=>`<p><small>${gstr(n.t)}</small> ${n.m}</p>`).join(''):'<p>Zatím klid. Říše se rozvíjejí a brzy začnou válčit.</p>');
 function tHangar(){return Object.keys(UN).map(k=>{const rq=reqOK(UN[k].req),c=uCost(k);return `<div class="row urow" data-u="${k}"><div class="rh">${uimg(k)}<div><h3>${uName(k)} <span class="lv">máš ${S.u[k]}</span></h3><p>${UN[k].d}</p><span class="cost">Síla ${UN[k].atk} · HP ${HP[k]} · za kus <i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</span>${rq?`<p class="mx"></p><p class="tc cost"></p><p class="eta" data-c="0,0"></p>`:`<p class="bad">Vyžaduje: ${reqTx(UN[k].req)}</p>`}</div></div>${rq?`<div class="qty"><input type="number" inputmode="numeric" min="1" value="${QT[k]||1}" aria-label="Počet kusů"><button class="chip" data-k="x:${k}">Max</button><button class="go" data-k="u:${k}">Vyrobit</button></div>`:''}</div>`}).join('')}
-function tOver(){const r=rates(),bd=board(),rank=bd.findIndex(x=>x.me)+1;
+function tOverMain(){const r=rates(),bd=board(),rank=bd.findIndex(x=>x.me)+1;
  return `<div class="stats"><div><small>Planety</small><b>${nPl()} / ${maxPl()}</b></div><div><small>Těžba</small><b>${r.n.toFixed(1)} / ${r.t.toFixed(1)} /s</b></div><div><small>Síla flotily</small><b>${fmt(myArmy())}</b></div><div><small>Pořadí</small><b>${rank}. z ${bd.length}</b></div></div><h2>Tvoje planety</h2>`+
  Object.keys(S.pl).map(k=>{const p=S.pl[k],q=pr(k),g=GAL[k],us=sum(p.b),fl=fields(g);return `<div class="card"><div class="ph"><svg class="pa s" viewBox="0 0 64 64">${art(g,'o',32,32,26)}</svg><div><h3>${pn(k)} ${k==S.home?'<span class="tag">hlavní</span>':''}</h3><p>${TY[g.ty].n} · ${SYS[g.s]}</p></div></div><p class="cost"><i class="gem n"></i>+${q.n.toFixed(1)}/s <i class="gem t"></i>+${q.t.toFixed(1)}/s · Obrana ${fmt(dfn(k))} · Posádka ${p.gar}</p><p>Doly ${p.b.naq}/${p.b.tri} · Reaktor ${p.b.reak} · Platforma ${p.b.def} · Štít ${p.b.shd} · Továrna ${p.b.fac||0} · Tábor ${p.b.bar||0} · Stanice ${p.b.rsr||0}</p><p>Zaměření: ${p.sp?SPN[p.sp][0]:'žádné'}${p.q&&p.q.length?' · ve výstavbě: '+p.q.map(x=>B[x.key].n).join(', '):''}</p><div class="fbar"><i style="width:${Math.min(100,us/fl*100)}%"></i></div><p>Zastavěno ${us} / ${fl} polí</p>${q.e<1?`<p class="bad">Energie ${Math.round(q.e*100)} %</p>`:''}<button class="go" data-k="s:${k}">Spravovat</button><button class="go" data-k="n:${k}">Přejmenovat</button>${k!=S.home?`<button class="go" data-k="g:${k}" ${S.u.inf>=5?'':'disabled'}>Posílit +5</button>`:''}</div>`}).join('')+newsHTML()}
 const SPN={mine:['Těžební centrum','+20 % těžba na planetě'],fort:['Pevnost','+25 % obrana planety'],sci:['Vědecké centrum','+10 % rychlost výzkumu (nejvýše 3 planety)'],ind:['Průmyslový svět','+25 % rychlost stavby a −5 % ceny staveb na planetě'],mil:['Vojenská základna','−5 % cena jednotek (nejvýše 3 planety), dvojnásobný výcvik posádky']};
 const qslots=k=>1+Math.floor(((S.pl[k].b.fac||0)+(S.g.eng||0))/4),gslots=()=>1+Math.floor((S.g.eng||0)/4);
 const bmult=t=>bcm()*(t=='b'&&S.pl[S.cur].sp=='ind'?.95:1);
 const bspeed=t=>(1+.08*(S.g.eng||0))*(t=='b'?(1+.15*(S.pl[S.cur].b.fac||0))*(S.pl[S.cur].sp=='ind'?1.25:1):1)*(S.doc=='eco'?1.1:1);
-const bdur=(t,k,l)=>Math.max(3,Math.round((t=='b'?B:G)[k].t*Math.pow(1.45,l)/bspeed(t)));
+const bdur=(t,k,l)=>Math.max(3,Math.round(((t=='b'?B:G)[k].t||30)*Math.pow(1.45,l)/bspeed(t)));
 function startQ(t,k){const p=S.pl[S.cur],d=(t=='b'?B:G)[k],o=t=='b'?p.b:S.g,q=t=='b'?(p.q=p.q||[]):S.gq,l=o[k]||0,c=cost(d,l,bmult(t));
  if(!reqOK(d.req)||q.some(x=>x.key==k)||q.length>=(t=='b'?qslots(S.cur):gslots())||(t=='b'&&sum(p.b)+q.length>=fields(GAL[S.cur]))||!ok(c))return;pay(c);const now=Date.now(),du=bdur(t,k,l)*1000;q.push({key:k,s:now,e:now+du,c});log(`Zahájena stavba: ${d.n} (úr. ${l+1}), potrvá ${fmtT(du/1000)}.`)}
 function finishB(t,k,x){const d=(t=='b'?B:G)[x.key],p=t=='b'?S.pl[k]:null,o=t=='b'?p.b:S.g,q=t=='b'?p.q:S.gq;o[x.key]=(o[x.key]||0)+1;q.splice(q.indexOf(x),1);log(`Stavba dokončena: ${d.n} (úr. ${o[x.key]})${t=='b'?' na '+pn(k):''}.`,'w');xp('eco',25);st('bld');
  const r=Math.random();if(t=='b'&&r<.12&&['naq','tri','reak'].includes(x.key)){p.buf={m:1.25,e:Date.now()+1800000};log(`Bohaté ložisko! Těžba na planetě ${pn(k)} je o 25 % vyšší po dobu 30 minut.`,'w')}
  else if(r<.22){const now=Date.now();[...Object.values(S.pl).flatMap(pp=>pp.q||[]),...S.gq].forEach(y=>{y.e-=Math.max(0,y.e-now)*.3});log('Inspirace inženýrů! Ostatní probíhající stavby se urychlily o 30 %.','w')}
  else if(r<.3){S.n+=Math.round(x.c[0]*.4);S.t+=Math.round(x.c[1]*.4);log('Při stavbě byly nalezeny zásoby: vráceno 40 % ceny.','w')}}
-function buildTick(){const now=Date.now();for(const k in S.pl){const p=S.pl[k];if(p.q&&p.q.length)p.q.slice().forEach(x=>{if(now>=x.e)finishB('b',k,x)})}S.gq.slice().forEach(x=>{if(now>=x.e)finishB('q',0,x)})}
+function fixQueues(){const now=Date.now(),fx=x=>{if(!isFinite(x.s)||!isFinite(x.e)){x.s=now;x.e=now+5000}};for(const k in S.pl)(S.pl[k].q||[]).forEach(fx);(S.gq||[]).forEach(fx);(S.rq||[]).forEach(fx)}
+function buildTick(){const now=Date.now();fixQueues();for(const k in S.pl){const p=S.pl[k];if(p.q&&p.q.length)p.q.slice().forEach(x=>{if(now>=x.e)finishB('b',k,x)})}S.gq.slice().forEach(x=>{if(now>=x.e)finishB('q',0,x)})}
 function brow(t,k){const d=(t=='b'?B:G)[k],p=S.pl[S.cur],o=t=='b'?p.b:S.g,l=o[k]||0,c=cost(d,l,bmult(t)),q=t=='b'?(p.q||[]):S.gq,inq=q.some(x=>x.key==k),full=t=='b'&&sum(p.b)+q.length>=fields(GAL[S.cur]),rq=reqOK(d.req),busy=!inq&&q.length>=(t=='b'?qslots(S.cur):gslots()),can=rq&&!inq&&!busy&&!full&&ok(c);
  return `<div class="row"><div class="rh">${ic(k)}<div><h3>${d.n} <span class="lv">úr. ${l}</span></h3><p>${d.d}</p><span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])} · stavba ${fmtT(bdur(t,k,l))}</span>${!rq?`<p class="bad">Vyžaduje: ${reqTx(d.req)}</p>`:inq?'<p class="eta yes">Ve výstavbě…</p>':full?'<p class="bad">Planeta nemá volná pole.</p>':busy?'<p class="bad">Všechny stavební sloty jsou obsazené.</p>':`<p class="eta" data-c="${c[0]},${c[1]}"></p>`}</div></div><div class="bt"><button class="go" data-k="${t=='b'?'sb':'sq'}:${k}" ${can?'':'disabled'}>${inq?'Probíhá':l?'Vylepšit':'Postavit'}</button>${l?`<button class="go dm" data-k="d${t}:${k}">Zbourat</button>`:''}</div></div>`}
 function qhtml(arr,cancel){const isB=cancel=='bc',p=S.pl[S.cur];return arr.map((x,i)=>`<div class="card"><div class="rh">${ic(x.key)}<div style="flex:1"><h3>${(isB?B:G)[x.key].n} <span class="lv">→ úr. ${((isB?p.b:S.g)[x.key]||0)+1}</span></h3><p class="cost">Zbývá <span class="cd" data-t="${x.e}"></span></p></div></div><div class="pg"><i data-s="${x.s}" data-e="${x.e}"></i></div><button class="go dm" data-k="${cancel}:${i}">Zrušit (vrátí 50 %)</button></div>`).join('')}
@@ -373,13 +374,43 @@ function tHeroes(){const own=heroes(),mx=maxHeroes(),n=own.length;
  const av=Object.keys(HEROES).filter(id=>HEROES[id].r==S.race&&!S.hero[id]);
  h+=`<h2>K náboru</h2>`+(av.length?av.map(id=>{const d=HEROES[id],t=HT[d.t],c=hc(id),full=n>=mx;return `<div class="row"><div class="rh">${hpic(id,0)}<div><h3>${d.n}</h3><p>${d.d}</p><span class="cost">${t.n}: +${Math.round(t.v*100)} % ${t.u} za úroveň (max. úr. 10) · <i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</span>${full?'<p class="bad">Není volné místo, vylepši Kasárna.</p>':`<p class="eta" data-c="${c[0]},${c[1]}"></p>`}</div></div><button class="go" data-k="h:${id}" ${full||!ok(c)?'disabled':''}>Najmout</button></div>`}).join(''):'<p>Všechny hrdiny své rasy už máš.</p>');
  return h}
+// ---- milníky a odměny ----
+let ov='main';
+const MSC=['Expanze','Válka','Rozvoj','Diplomacie','Hrdinové','Čas'],st=(k,n)=>{S.st=S.st||{};S.st[k]=(S.st[k]||0)+(n==null?1:n)};
+function msInit(){S.ms=S.ms||{};S.msn=S.msn||{};S.medals=S.medals||0;S.st=S.st||{};S.daily=S.daily||{t:0,s:0}}
+const msVal=m=>m.stat=='rk'?(S.st.rk||99):(S.st[m.stat]||0),msReach=m=>{const v=msVal(m);return m.goals.filter(g=>m.inv?v<=g:v>=g).length};
+function msClaimable(){msInit();let n=MS.reduce((a,m)=>a+Math.max(0,msReach(m)-(S.ms[m.id]||0)),0);if(Date.now()-S.daily.t>=20*3600*1000)n++;return n}
+function msUpdate(){msInit();const x=S.st,g=gdate(Date.now());x.pl=Math.max(x.pl||0,nPl());x.pow=Math.max(x.pow||0,Math.round(myArmy()));x.ally=Math.max(x.ally||0,S.co.length);x.hn=Math.max(x.hn||0,heroes().length);x.hlv=Math.max(x.hlv||0,...heroes().map(i=>S.hero[i].lv));x.tl=sum(S.r);x.gd=(g.y-1)*365+g.d;
+ if(Date.now()>(S._rk||0)){S._rk=Date.now()+10000;const r=board().findIndex(b=>b.me)+1;x.rk=Math.min(x.rk||99,r)}
+ MS.forEach(m=>{const r=msReach(m);if(r>(S.ms[m.id]||0)&&r>(S.msn[m.id]||0)){S.msn[m.id]=r;log(`Milník splněn: ${m.n} (stupeň ${r}/${m.goals.length}). Odměnu převezmeš v Přehledu, záložka Milníky.`,'w')}})}
+function claimMs(id){msInit();const m=MS.find(x=>x.id==id);if(!m)return false;const r=msReach(m),d=S.ms[id]||0;if(r<=d)return false;const out=[];
+ for(let i=d;i<r;i++){const b=[300,1000,3000,8000,20000][i],n=Math.round(b*(m.rt=='n'?1.5:m.rt=='t'?.5:1)),t=Math.round(b*(m.rt=='t'?1.5:m.rt=='n'?.5:1));S.n+=n;S.t+=t;const md=i==m.goals.length-1?2:1;S.medals+=md;let sp='';
+  if(i>=1){const now=Date.now();
+   if(m.sp=='inf'){const q=[0,5,15,40,100][i];S.u.inf+=q;sp=`+${q} pěchoty`}
+   else if(m.sp=='ftr'){const q=[0,3,8,20,50][i];S.u.ftr+=q;sp=`+${q} stíhačů`}
+   else if(m.sp=='col'){S.u.col+=1;sp='+1 kolonizační loď'}
+   else if(m.sp=='hx'){const q=200*i*i;heroes().forEach(h=>addXp(h,q));sp=heroes().length?`+${q} zkušeností hrdinům`:''}
+   else if(m.sp=='rb'){const f=Math.min(.6,.15*i);S.rq.forEach(x=>{x.e-=Math.max(0,x.e-now)*f});sp=S.rq.length?`výzkumy zrychleny o ${Math.round(f*100)} %`:''}
+   else if(m.sp=='bb'){const f=Math.min(.6,.15*i);[...Object.values(S.pl).flatMap(p=>p.q||[]),...S.gq].forEach(x=>{x.e-=Math.max(0,x.e-now)*f});sp=`stavby zrychleny o ${Math.round(f*100)} %`}}
+  out.push(`${fmt(n)} naquadah, ${fmt(t)} trinia, ${md}× medaile${sp?', '+sp:''}`)}
+ S.ms[id]=r;log(`Odměna za milník ${m.n}: ${out.join(' | ')}.`,'w');return true}
+function claimAll(){msInit();let c=0;MS.forEach(m=>{if(claimMs(m.id))c++});return c}
+function claimDaily(){msInit();const now=Date.now(),d=S.daily;if(now-d.t<20*3600*1000)return;d.s=(now-d.t<48*3600*1000)?d.s+1:1;d.t=now;const k=1+.25*Math.min(d.s-1,6),n=Math.round(400*k),t=Math.round(400*k);S.n+=n;S.t+=t;let ex='';if(d.s%7==0){S.medals+=1;heroes().forEach(h=>addXp(h,500));ex=' a medaile se zkušenostmi pro hrdiny'}st('daily');log(`Denní odměna (série ${d.s} dní): ${fmt(n)} naquadah a ${fmt(t)} trinia${ex}.`,'w')}
+function tMs(){msInit();const tot=MS.reduce((a,m)=>a+m.goals.length,0),dn=MS.reduce((a,m)=>a+(S.ms[m.id]||0),0),dly=Date.now()-S.daily.t>=20*3600*1000;
+ let h=`<div class="stats"><div><small>Medaile</small><b>${S.medals}</b></div><div><small>Bonus</small><b>+${(S.medals*.4).toFixed(1)} % těžba</b></div><div><small>Splněno</small><b>${dn} / ${tot}</b></div></div>`;
+ h+=`<div class="card"><h3>Denní odměna <span class="lv">série ${S.daily.s} dní</span></h3><p>Vyzvedni si ji jednou za 20 hodin. Pokud přijdeš do dvou dnů, série roste a odměna se zvětšuje (až o 150 %). Každý 7. den navíc medaile a zkušenosti hrdinům.</p>${dly?`<button class="go" data-k="dl:x">Převzít denní odměnu</button>`:`<p class="cost">Další odměna za <span class="cd" data-t="${S.daily.t+20*3600*1000}"></span></p>`}</div>`;
+ const un=MS.filter(m=>msReach(m)>(S.ms[m.id]||0)).length;if(un)h+=`<button class="go" data-k="mc:x" style="width:100%;margin:8px 0">Převzít všechny odměny (${un})</button>`;
+ for(const cat of MSC){h+=`<h2>${cat}</h2>`;MS.filter(m=>m.cat==cat).forEach(m=>{const v=msVal(m),r=msReach(m),d=S.ms[m.id]||0,n=m.goals.length,done=d>=n,goal=m.goals[Math.min(r,n-1)],pct=done?100:m.inv?Math.min(100,Math.max(0,(100-v)/(100-goal)*100)):Math.min(100,v/goal*100);
+   h+=`<div class="card ms${r>d?' rdy':''}"><h3>${m.n} <span class="lv">${d} / ${n}</span></h3><p>${m.d}</p><div class="pg"><i style="width:${pct}%"></i></div><p class="cost">${m.inv?'Nejlepší pořadí: '+(v>=99?'zatím žádné':v+'.'):fmt(v)} · cíl ${m.inv?goal+'.':fmt(goal)}${done?' · splněno':''}</p><div class="pips">${m.goals.map((g,i)=>`<i class="${i<d?'on':i<r?'rd':''}" title="${m.inv?g+'.':fmt(g)}"></i>`).join('')}</div>${r>d?`<button class="go" data-k="ms:${m.id}">Převzít odměnu (${r-d}×)</button>`:''}</div>`})}
+ return h}
+function tOver(){msInit();const cl=msClaimable();return `<div class="seg two"><button class="${ov=='main'?'act':''}" data-ov="main">Přehled</button><button class="${ov=='ms'?'act':''}" data-ov="ms">Milníky${cl?' ('+cl+')':''}</button></div>`+(ov=='ms'?tMs():tOverMain())}
 function build(){return ({over:tOver,base:tBase,lab:tLab,hangar:tHangar,map:tMap,hero:tHeroes,dip:tDip})[tab]()}
 function render(){const h=build();if(h===last)return;last=h;$('#tab').innerHTML=h}
 function dyn(){const now=Date.now();
  document.querySelectorAll('.urow').forEach(r=>{const k=r.dataset.u,inp=r.querySelector('input');if(!inp)return;QT[k]=inp.value;const c=uCost(k),mx=Math.floor(Math.min(S.n/c[0],S.t/c[1])),q=Math.max(1,Math.floor(+inp.value)||1),tc=[c[0]*q,c[1]*q];r.querySelector('.mx').textContent='Můžeš vyrobit: '+fmt(mx)+' ks';r.querySelector('.tc').innerHTML=`Celkem za ${q} ks: <i class="gem n"></i>${fmt(tc[0])} <i class="gem t"></i>${fmt(tc[1])}`;r.querySelector('.eta').dataset.c=tc.join(',');r.querySelector('[data-k^="u:"]').disabled=!ok(tc)});document.querySelectorAll('.eta').forEach(e=>{if(!e.dataset.c)return;const [a,b]=e.dataset.c.split(',').map(Number),t=eta([a,b]);e.textContent=t;e.className='eta'+(t[0]=='✓'?' yes':'')});document.querySelectorAll('.cd').forEach(e=>e.textContent=fmtT(Math.max(0,(+e.dataset.t-now)/1000)));document.querySelectorAll('.pg i').forEach(e=>e.style.width=Math.min(100,Math.max(0,(now-e.dataset.s)/(e.dataset.e-e.dataset.s)*100))+'%')}
 function draw(){const now=Date.now(),g=gdate(now);$('#gal').textContent='Rok '+g.y+' · den '+g.d+' · '+g.t;
  const r=rates(),rk=board().findIndex(x=>x.me)+1;$('#r-n').textContent=fmt(S.n);$('#r-t').textContent=fmt(S.t);$('#p-n').textContent='+'+r.n.toFixed(1)+'/s';$('#p-t').textContent='+'+r.t.toFixed(1)+'/s';
- $('#r-p').textContent=nPl()+' / '+maxPl();$('#p-p').textContent='pořadí '+rk+'.';$('#gate').classList.toggle('open',S.fl.length>0);render()}
+ $('#r-p').textContent=nPl()+' / '+maxPl();$('#p-p').textContent='pořadí '+rk+'.';$('#gate').classList.toggle('open',S.fl.length>0);{const nb=document.querySelector('nav [data-tab="over"]');if(nb)nb.classList.toggle('dot',msClaimable()>0)}render()}
 function setTab(t){tab=t;last=null;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.dataset.tab==t));render();dyn();scrollTo(0,0)}
 function hud(){$('#diff').textContent='Obtížnost soupeřů: '+['Lehká','Normální','Těžká'][S.diff==null?1:S.diff];const r=RACES[S.race];$('#emb').style.background=`linear-gradient(135deg,${r.c[0]},${r.c[1]})`;$('#who').textContent=S.cmd+' · '+r.n}
 function pick(id){S.race=id;S.cmd=S.cmd||'Velitel';S.home=HK(id);S.pl={[S.home]:home()};S.cur=S.home;S.ts=S.start=Date.now();initAI();hud();$('#pick').hidden=true;save();log('Vítej, '+S.cmd+'. Tvůj domovský svět: '+GAL[S.home].name+'.');setTab('over');tick()}
@@ -388,6 +419,7 @@ document.addEventListener('click',e=>{
  const rc=e.target.closest('[data-race]');if(rc)return pick(rc.dataset.race);
  const n=e.target.closest('nav button');if(n)return setTab(n.dataset.tab);
  if(e.target.closest('#next')){S.cmd=($('#cmd').value||'Velitel').trim().slice(0,20)||'Velitel';$('#step1').hidden=true;$('#step2').hidden=false;return}
+ const ob=e.target.closest('[data-ov]');if(ob){ov=ob.dataset.ov;last=null;render();return dyn()}
  const gb=e.target.closest('[data-gm]');if(gb){gm=gb.dataset.gm;last=null;render();return dyn()}
  const fb=e.target.closest('[data-gf]');if(fb){gf=fb.dataset.gf;last=null;render();return dyn()}
  const pl=e.target.closest('[data-pl]');if(pl){sel=+pl.dataset.pl;last=null;render();const c=document.querySelector('.pc.sel');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center',behavior:'smooth'});return dyn()}
@@ -395,6 +427,9 @@ document.addEventListener('click',e=>{
  const b=e.target.closest('[data-k]');if(!b)return;const [t,k]=b.dataset.k.split(':');
  if(t=='bc'||t=='gc'){const q=t=='bc'?(S.pl[S.cur].q||[]):S.gq,x=q[+k];if(x){q.splice(+k,1);S.n+=Math.floor(x.c[0]*.5);S.t+=Math.floor(x.c[1]*.5);log('Stavba '+(t=='bc'?B:G)[x.key].n+' zrušena, vráceno 50 % ceny.')}save();draw();return dyn()}
  if(t=='sp'){const p=S.pl[S.cur];if(p.sp==k)return;if(p.sp){if(Date.now()<(p.spc||0)){log('Zaměření této planety lze měnit nejvýše jednou za 15 minut.','l');return}if(!ok([300,300])){log('Na změnu zaměření nemáš dost surovin.','l');return}pay([300,300])}p.sp=k;p.spc=Date.now()+900000;log(`Planeta ${pn(S.cur)} má nové zaměření: ${SPN[k][0]}.`,'w');save();draw();return dyn()}
+ if(t=='ms'){claimMs(k);save();draw();return dyn()}
+ if(t=='mc'){claimAll();save();draw();return dyn()}
+ if(t=='dl'){claimDaily();save();draw();return dyn()}
  if(t=='gf'){const [id,i]=k.split('|');sendGift(id,i);save();draw();return dyn()}
  if(t=='rs'){startR(k);save();draw();return dyn()}
  if(t=='rc'){const p=S.rq[+k];if(p){S.rq.splice(+k,1);S.n+=Math.floor(p.c[0]*.5);S.t+=Math.floor(p.c[1]*.5);log('Výzkum '+R[p.k].n+' zrušen, vráceno 50 % ceny.')}save();draw();return dyn()}
@@ -424,9 +459,9 @@ function save(){try{localStorage.setItem('sgc13',JSON.stringify(S))}catch(e){}}
  let c='';for(let i=0;i<9;i++){const a=(i*40+200)*Math.PI/180;c+=`<g transform="translate(${200+183*Math.sin(a)} ${200-183*Math.cos(a)}) rotate(${i*40+200})"><path class="chev" d="M-17 -15L17 -15L10 15L-10 15Z"/></g>`}$('#chevs').innerHTML=c;
  [['l1',90,1],['l2',60,1.4],['l3',35,2]].forEach(([id,n,sz],j)=>{const cv=document.createElement('canvas');cv.width=cv.height=512;const x=cv.getContext('2d'),r=rng(7+j);for(let i=0;i<n;i++){x.fillStyle=`rgba(${j==2?'255,230,190':'255,255,255'},${.35+r()*.65})`;x.fillRect(Math.floor(r()*512),Math.floor(r()*512),sz,sz)}$('#'+id).style.backgroundImage=`url(${cv.toDataURL()})`})})();
 async function boot(){
- try{const r=await fetch('data.json?v=14');if(!r.ok)throw new Error(r.status);({TY,SYS,PLN,GOA,B,G,R,UN,RACES,HEROES,HT,MS}=await r.json())}
+ try{const r=await fetch('data.json?v=15');if(!r.ok)throw new Error(r.status);{const D=await r.json();({TY,SYS,PLN,GOA,B,G,R,UN,RACES,HEROES,HT,MS}=D);DV=D.ver}}
  catch(e){$('#tab').textContent='Nepodařilo se načíst data.json. Hru spusť přes server (npm start), ne otevřením souboru.';return}
- TK=Object.keys(TY);buildGalaxy();mkDefs();$('#ver').textContent='Verze '+VER;
+ TK=Object.keys(TY);buildGalaxy();mkDefs();$('#ver').textContent='Verze '+VER+(DV===15?'':' · POZOR: soubor data.json je starý, nahraď všechny soubory ve složce public najednou');
  if(!S.race||!RACES[S.race]){S=fresh();$('#cards').innerHTML=Object.keys(RACES).map(id=>{const r=RACES[id];return `<button class="rc" data-race="${id}" style="--a:${r.c[0]};--b:${r.c[1]}"><span class="emb"></span><h3>${r.n}</h3><p>${r.d}</p><small>${r.bonus}</small></button>`}).join('');$('#pick').hidden=false;setTimeout(()=>$('#cmd').focus(),150);setInterval(tick,1000);setInterval(save,5000);return}
  hud();tick();setInterval(tick,1000);setInterval(save,5000)}
 boot();
