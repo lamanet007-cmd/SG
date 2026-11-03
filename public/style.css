@@ -153,3 +153,13 @@ nav button.dot::after{content:"";position:absolute;top:6px;left:calc(50% + 10px)
 .card.ms.rdy{border-left-color:var(--grn);box-shadow:0 0 18px #7ddc8c33}
 .pips{display:flex;gap:6px;margin:4px 0 6px}.pips i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);background:transparent}
 .pips i.rd{border-color:var(--grn);background:#7ddc8c33}.pips i.on{border-color:var(--gold);background:var(--gold)}
+
+/* v16: vlastnosti planet a flotily */
+.trt{font:600 12px Barlow;padding:1px 8px;border-radius:3px;color:#0b0e12}
+.trt.tN{background:#c58cff}.trt.tT{background:#ffb43c}.trt.tV{background:#6fc3ff}.trt.tE{background:#ffe08a}.trt.tS{background:#e0705a}.trt.tB{background:#7ddc8c}
+.fr{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}.fr span{flex:1;min-width:130px}.fr b{min-width:34px;text-align:center}.fr .chip{min-width:46px;padding:4px 8px}
+.card.fl.sel{border-left-color:var(--gold);box-shadow:0 0 18px #c9a24b33}
+
+/* v16b: kompaktní řádky flotily */
+.fr{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;margin:8px 0}.fr span{grid-column:1}.fr b{grid-column:2;text-align:right;min-width:0}
+.fr .fb{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.fr .fb .chip{margin:0;width:100%;min-width:0}
