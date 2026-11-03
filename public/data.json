@@ -381,7 +381,7 @@
   },
   "ter": {
    "n": "Terraformace",
-   "d": "+2 pole k zastavění na každé planetě za úroveň.",
+   "d": "+4 pole k zastavění na každé planetě za úroveň.",
    "c": [
     350,
     450
@@ -1590,5 +1590,55 @@
    "sp": "hx"
   }
  ],
- "ver": 15
+ "ver": 16,
+ "TR": {
+  "N": {
+   "n": "Bohatá na naquadah",
+   "d": "+60 % naquadah, −20 % trinium.",
+   "m": [
+    1.6,
+    0.8
+   ]
+  },
+  "T": {
+   "n": "Bohatá na trinium",
+   "d": "+60 % trinium, −20 % naquadah.",
+   "m": [
+    0.8,
+    1.6
+   ]
+  },
+  "V": {
+   "n": "Vědecké naleziště",
+   "d": "Výzkumná stanice tu působí dvojnásobně a planeta zrychluje výzkum o 4 % (nejvýše 3 planety). Těžba −10 %.",
+   "m": [
+    0.9,
+    0.9
+   ]
+  },
+  "E": {
+   "n": "Energetické pole",
+   "d": "Reaktor tu dává 1,8× víc energie.",
+   "m": [
+    1,
+    1
+   ]
+  },
+  "S": {
+   "n": "Strategický terén",
+   "d": "+30 % obrana planety a +10 % rychlost stavby.",
+   "m": [
+    1,
+    1
+   ]
+  },
+  "B": {
+   "n": "Vyvážená planeta",
+   "d": "+15 % naquadah i trinium.",
+   "m": [
+    1.15,
+    1.15
+   ]
+  }
+ }
 }
