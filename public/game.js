@@ -1,446 +1,251 @@
-// Stargate: Galaktické velení. Herní data jsou v data.json.
-const VER='v16';globalThis.__sg=VER;
-const $=s=>document.querySelector(s),fmt=n=>Math.floor(n).toLocaleString('cs-CZ');
-let DV,TR,TY,TK,SYS,PLN,GOA,B,G,R,UN,RACES,HEROES,HT,MS,SK=[];const GAL=[],ROLES=['inf','elite','ftr','crs','flg','col'],ATK=['inf','elite','ftr','crs','flg'];
-function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const SOL=[['Merkur','des',12,'Nejmenší planeta, nejblíže ke hvězdě.'],['Venuše','vol',14,'Žhavá planeta ukrytá pod hustými mraky.'],['Země','oce',20,'Modrá planeta, domov lidstva.'],['Mars','des',16,'Rudá planeta s vyschlými řečišti.'],['Jupiter','gas',8,'Největší plynný obr, s bouří velkou jako celá planeta.'],['Saturn','gas',8,'Plynný obr s nápadným prstencem.'],['Uran','ice',10,'Ledový obr, který se valí po boku.'],['Neptun','ice',10,'Vzdálený ledový obr s ledovými bouřemi.']];
-const TRPICK=k=>{const x=rng(k*13+7)();return x<.22?'N':x<.44?'T':x<.6?'V':x<.72?'E':x<.84?'S':'B'};
-function buildGalaxy(){const r=rng(2010);let key=0;
- for(let s=0;s<12;s++){SK[s]=[];for(let i=0;i<(s?5:8);i++){const p=Math.round(25*Math.pow(1+s,1.9)*(.6+r()*.8)*(1+i*.1)),ty=TK[Math.floor(r()*TK.length)],npc=s>0&&r()<.1+s*.03,fl=2*(ty=='gas'?8+Math.floor(r()*4):14+Math.floor(r()*12)+({oce:2,jun:2,vol:-2}[ty]||0)),g={key,s,i,ty,npc,p,loot:[Math.round(p*2.6),Math.round(p*1.8)],fl,name:s?PLN[s][i]:SYS[s]+' '+'abcde'[i]};
-  if(!s)Object.assign(g,{name:SOL[i][0],ty:SOL[i][1],fl:SOL[i][2]*2,npc:false,desc:SOL[i][3]});
-  g.tr=!s?['T','E','B','N','E','N','V','T'][i]:TRPICK(key);GAL.push(g);SK[s].push(key++)}}
- [...Object.values(RACES),GOA].forEach(h=>Object.assign(GAL[SK[h.hk[0]][h.hk[1]]],{ty:h.ht,fl:40,npc:false,tr:'B'}))}
-const HK=id=>{const h=(id=='goauld'?GOA:RACES[id]).hk;return SK[h[0]][h[1]]};
-// ---- stav ----
-const BL=()=>({naq:1,tri:1,reak:1,def:0,shd:0,fac:0,bar:0,rsr:0});
-const home=()=>({b:{naq:1,tri:1,reak:1,def:0,shd:0,fac:0,bar:0,rsr:0},gar:0,name:'',sp:null});
-const fresh=()=>({race:null,cmd:'Velitel',n:500,t:300,pl:{},cur:0,home:0,hero:{},war:{},al:{},pc:{},pr:{},g:{lab:0,han:0,kas:1,dip:0,eng:1},gq:[],r:{zbr:0,stit:0,poh:0,kol:0,ener:0,tez:0,zat:0,mat:0,obr:0,ter:0,met:0,rec:0,log:0,gen:0,gra:0,hyp:0,str:0,gou:0,anc:0,rep:0},rq:[],disc:{},doc:null,dcd:0,ms:{},msn:{},medals:0,st:{},daily:{t:0,s:0},u:{inf:8,elite:0,ftr:0,crs:0,flg:0,col:0},own:{},ai:{},news:[],hist:[],fl:[],co:[],start:Date.now(),at:Date.now(),ca:Date.now()+150000,ts:Date.now()});
-const QT={};let gm='map',gf='weak',sel=null;
-let S=JSON.parse(localStorage.getItem('sgc13')||'null')||fresh(),tab='over',vs=0,last=null;
-const sum=o=>Object.values(o).reduce((a,v)=>a+v,0),maxPl=()=>2+S.r.kol,nPl=()=>Object.keys(S.pl).length,pn=k=>(S.pl[k]&&S.pl[k].name)||GAL[k].name,fields=g=>g.fl+4*S.r.ter;
-const RI=f=>RACES[f]||(S.dr&&S.dr[f])||GOA,fn=f=>RI(f).n,fc=f=>RI(f).c[0],gr=f=>RI(f).gr||70,ex=f=>RI(f).ex||1;
-const eff=k=>{let m=RACES[S.race].eff[k]||1;S.co.forEach(a=>{const v=RI(a).ally[k];if(v)m*=1+(v-1)*(1+Math.min(1,((S.gr||{})[a]||0)/20000))});return m*hm(k)*dm(k)};
-// ---- hrdinové: bonusy a automatický růst ----
-const heroes=()=>Object.keys(S.hero||{}),need=l=>Math.round(150*Math.pow(l,1.7)),maxHeroes=()=>Math.min(5,1+S.g.kas);
-const hv=t=>heroes().reduce((a,id)=>a+(HEROES[id].t==t?HT[t].v*S.hero[id].lv:0),0);
-const hm=k=>({atk:1+hv('atk'),def:1+hv('def'),prod:1+hv('eco'),res:Math.max(.5,1-hv('res')),spd:Math.max(.5,1-hv('spd')),loot:1+hv('loot')})[k]||1;
-function addXp(id,n){const h=S.hero[id];if(!h||h.lv>=10)return;h.xp+=n;while(h.lv<10&&h.xp>=need(h.lv)){h.xp-=need(h.lv);h.lv++;log(`Hrdina ${HEROES[id].n} dosáhl úrovně ${h.lv} (${HT[HEROES[id].t].n}).`,'w')}}
-const xp=(t,n)=>heroes().forEach(id=>{if(HEROES[id].t==t)addXp(id,n)}),hc=id=>HEROES[id].c.map(v=>Math.round(v*(1+heroes().length*.6)));
+let gameState = null;
 
-const cost=(d,l,m)=>d.c.map(v=>Math.ceil(v*Math.pow(d.f,l)*(m||1))),ok=c=>S.n>=c[0]&&S.t>=c[1],pay=c=>{S.n-=c[0];S.t-=c[1]};
-const reqOK=q=>!q||(Object.entries(q.g||{}).every(([k,v])=>S.g[k]>=v)&&Object.entries(q.r||{}).every(([k,v])=>S.r[k]>=v));
-const reqTx=q=>[...Object.entries(q.g||{}).map(([k,v])=>G[k].n+' '+v),...Object.entries(q.r||{}).map(([k,v])=>R[k].n+' '+v)].join(', ');
-const uName=r=>RACES[S.race].u[ROLES.indexOf(r)],uCost=r=>UN[r].c.map(v=>Math.ceil(v*(r=='inf'||r=='elite'?eff('ucost'):1)*Math.pow(.95,(S.r.log||0)+(S.r.rep||0))*Math.pow(.95,Math.min(3,plSp('mil')))));
-const pw=u=>ROLES.reduce((a,r)=>a+(u[r]||0)*UN[r].atk*mkM(r)*(r=='inf'||r=='elite'?eff('inf')*(1+.08*(S.r.gen||0)):1),0)*(1+.1*S.r.zbr+.08*(S.r.gou||0))*eff('atk');
-const myArmy=()=>{const u={};ATK.forEach(r=>u[r]=totU(r));return pw(u)},shield=()=>Math.max(.2,1-.08*S.r.stit);
-const dfn=k=>{const p=S.pl[k];return(30+p.gar*12+p.b.def*25)*(1+.15*p.b.shd)*(1+.1*S.r.zbr)*(1+.1*S.r.stit)*(1+.1*S.r.obr+.1*(S.r.gra||0))*eff('def')*(p.sp=='fort'?1.25:1)*(GAL[k].tr=='S'?1.3:1)};
-const cnt=f=>Object.values(S.own).filter(o=>o.f==f).length;
-const dfO=k=>{const o=S.own[k],bl=o.bl||BL(),a=S.ai[o.f];return Math.round(Math.max(o.cap?600:30,GAL[k].p)*(o.cap?3:1)*o.b*(GAL[k].tr=='S'?1.3:1)*(1+.12*bl.def+.15*bl.shd+.03*(bl.naq+bl.tri+bl.reak-3))*(a.p=='def'?1.25:1)*(o.f=='goauld'?1.4:1)*(1+.03*(a.tech||0)))};
-function pr(k){const b=S.pl[k].b,m=pm(k),prod=3*b.reak*Math.pow(1.1,b.reak)*(1+.1*S.r.ener)*(GAL[k].tr=='E'?1.8:1),use=2*(b.naq+b.tri),e=use?Math.min(1,prod/use):1,f=eff('prod')*(1+.08*S.r.tez)*(1+.06*(S.r.anc||0))*(1+.004*(S.medals||0))*(S.pl[k].sp=='mine'?1.2:1)*(S.pl[k].buf&&Date.now()<S.pl[k].buf.e?S.pl[k].buf.m:1);return{e,n:1.4*b.naq*Math.pow(1.12,b.naq)*e*m[0]*f,t:.9*b.tri*Math.pow(1.12,b.tri)*e*m[1]*f}}
-function rates(){let n=0,t=0;for(const k in S.pl){const p=pr(k);n+=p.n;t+=p.t}return{n,t}}
-function gdate(t){const gm=Math.max(0,(t-S.start)/1000)*60,d=Math.floor(gm/1440);return{y:Math.floor(d/365)+1,d:d%365+1,t:String(Math.floor(gm%1440/60)).padStart(2,'0')+':'+String(Math.floor(gm%60)).padStart(2,'0')}}
-const gstr=t=>{const g=gdate(t);return 'R'+g.y+' D'+g.d+' '+g.t};
-function log(m,c){const d=document.createElement('div');d.className=c||'';d.textContent=gstr(Date.now())+'  '+m;$('#log').prepend(d)}
-const travel=k=>(8+6*Math.abs(GAL[k].s-GAL[S.cur].s))*Math.pow(.85,S.r.poh)*Math.pow(.9,S.r.hyp||0)*hm('spd');
-const fmtT=s=>{s=Math.ceil(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${m} min`:m?`${m} min ${s%60} s`:`${s} s`};
-function eta(c){const nn=Math.max(0,c[0]-S.n),nt=Math.max(0,c[1]-S.t);if(!nn&&!nt)return'✓ Dost surovin';const r=rates();if((nn&&r.n<=0)||(nt&&r.t<=0))return'Těžba je nulová';const s=Math.max(nn/r.n,nt/r.t);return'Dost surovin za '+fmtT(s)+(s<86400?' (v '+new Date(Date.now()+s*1000).toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})+')':'')}
-// ---- AI říše: osobnosti, ekonomika, armáda, kolonizace a války ----
-const HP={inf:18,elite:56,ftr:70,crs:450,flg:1800,col:60},PERS={war:'agresivní',eco:'ekonomická',def:'obranná'};
-const news=m=>{S.news.unshift({t:Date.now(),m});S.news.length=Math.min(S.news.length,12)},hist=m=>{S.hist.unshift(m);S.hist.length=Math.min(S.hist.length,8)};
-function fight(A,Ah,D,sh){let ap=Ah,dp=D*2,rs=[];for(let i=0;i<6&&ap>0&&dp>0;i++){const da=A*.5*(.8+Math.random()*.4)*Math.max(.12,ap/Ah),dd=D*.5*(.8+Math.random()*.4)*sh*Math.max(.12,dp/(D*2));dp-=da;ap-=dd;rs.push({a:Math.max(0,ap)/Ah,d:Math.max(0,dp)/(D*2),da:Math.round(da),dd:Math.round(dd)})}return{win:dp<=0&&ap>0,rs,af:Math.max(0,ap)/Ah}}
-function initAI(){const r=rng(5),ids=Object.keys(RACES).filter(x=>x!=S.race),P=['war','eco','def'],gk=HK('goauld'),homes=new Set([...Object.keys(RACES).map(x=>HK(x)),gk]),CB=()=>({naq:3,tri:3,reak:3,def:2,shd:1});S.own={};S.ai={};S.news=[];S.hist=[];S.dr={};S.dead=[];S.nid=0;
- GAL.forEach(g=>{if(g.npc&&!homes.has(g.key))S.own[g.key]={f:'goauld',b:1,bl:{naq:1+Math.floor(r()*3),tri:1+Math.floor(r()*3),reak:1+Math.floor(r()*2),def:Math.floor(r()*3),shd:r()<.3?1:0}}});
- S.own[gk]={f:'goauld',b:1,cap:1,bl:CB()};S.ai.goauld={army:300,cs:GAL[gk].s,res:300,p:'war',pa:0,pb:0,pc:0};
- ids.forEach(id=>{const k=HK(id);S.own[k]={f:id,b:1,cap:1,bl:CB()};const nb=GAL.find(x=>x.s==GAL[k].s&&x.key!=k&&!S.own[x.key]&&!homes.has(x.key));if(nb)S.own[nb.key]={f:id,b:1,bl:BL()};S.ai[id]={army:200+r()*150,cs:GAL[k].s,res:300,p:P[Math.floor(r()*3)],pa:0,pb:0,pc:0}});const al=ids.slice().sort(()=>r()-.5).slice(0,4);S.al={};for(let i=0;i+1<al.length;i+=2){S.al[al[i]]=[al[i+1]];S.al[al[i+1]]=[al[i]]}S.war={goauld:Date.now()};S.pc={};S.pr={};S.aw={};S.ac={};S.at=Date.now();{const a=ids[0],b=ids.find(x=>x!=a&&!bloc(a).includes(x));if(b)declareAI(a,b)}}
-const bloc=f=>[f,...(S.al[f]||[])];
-function declareWar(f){const now=Date.now();if(f=='goauld'||S.war[f])return;if(S.co.includes(f)){log(`${fn(f)} jsou tvoji spojenci. Nejdřív je vyhoď z koalice.`,'l');return}
- const jn=[];bloc(f).forEach(x=>{if(S.co.includes(x)){S.al[f]=(S.al[f]||[]).filter(y=>y!=x);S.al[x]=(S.al[x]||[]).filter(y=>y!=f);news(`${fn(x)} přerušili spojenectví s říší ${fn(f)} a stojí na tvé straně.`)}else if(!S.war[x]){S.war[x]=now;if(x!=f)jn.push(x)}});
- const m=`Vyhlásil jsi válku říši ${fn(f)}${jn.length?' a jejím spojencům ('+jn.map(fn).join(', ')+')':''}.${S.co.length?' Tvoji spojenci ('+S.co.map(fn).join(', ')+') s tebou válčí také.':''}`;log(m,'l');news(m);hist(m)}
-function makePeace(f){const w=S.war[f],now=Date.now();if(f=='goauld'){log("Goa'uldi mír nepřijmou.",'l');return}if(!w)return;
- if(now<(S.pr[f]||0)){log(`${fn(f)} zatím neodpověděli, zkus to za chvíli.`);return}
- if(now-w<300000){log(`${fn(f)}: válka teprve začala, o míru nechtějí jednat (nejméně 5 minut).`,'l');return}
- const a=S.ai[f],p=({war:.15,eco:.6,def:.5})[a.p]+(myArmy()>=a.army*.5?.25:0);
- if(Math.random()<p){bloc(f).forEach(x=>{delete S.war[x];S.pc[x]=now+1200000});st('peace');const m=`${fn(f)} přijali mír${(S.al[f]||[]).length?' (i se svými spojenci)':''}.`;log(m,'w');news(m)}
- else{S.pr[f]=now+60000;log(`${fn(f)} návrh míru odmítli. Zkus to znovu za minutu.`,'l')}}
-function aiDeclare(f){const now=Date.now(),b=bloc(f).filter(x=>!S.co.includes(x)&&!S.war[x]&&x!='goauld');b.forEach(x=>S.war[x]=now);const m=`${fn(f)} ti vyhlásili válku${b.length>1?' i se svými spojenci ('+b.slice(1).map(fn).join(', ')+')':''}.`;log(m,'l');news(m)}
-const wk=(a,b)=>[a,b].sort().join('|'),atWar=(a,b)=>a!=b&&((S.ai&&S.ai.goauld&&(a=='goauld'||b=='goauld'))||!!(S.aw||{})[wk(a,b)]);
-function declareAI(f,t){const now=Date.now(),A=bloc(f),Bk=bloc(t);let n=0;A.forEach(x=>Bk.forEach(y=>{if(x!=y&&x!='goauld'&&y!='goauld'&&!(S.al[x]||[]).includes(y)&&!S.aw[wk(x,y)]){S.aw[wk(x,y)]=now;n++}}));if(!n)return false;
- news(`${fn(f)}${A.length>1?' a '+fn(A[1]):''} vyhlásili válku říši ${fn(t)}${Bk.length>1?' a jejímu spojenci '+fn(Bk[1]):''}.`);
- [[A,Bk],[Bk,A]].forEach(([s1,s2])=>{if(s1.some(x=>S.co.includes(x))){const en=s2.filter(y=>!S.co.includes(y)&&y!='goauld'&&!S.war[y]);en.forEach(y=>S.war[y]=now);if(en.length){const m=`Tvůj spojenec je ve válce, proto jsi ve válce i ty s: ${en.map(fn).join(', ')}.`;news(m);log(m,'l')}}});return true}
-function aiPact(){const fs=Object.keys(S.ai).filter(f=>f!='goauld'&&!(S.al[f]||[]).length&&!S.co.includes(f)&&cnt(f)>0);if(fs.length<2)return;let best=null,bs=0;
- for(let i=0;i<fs.length;i++)for(let j=i+1;j<fs.length;j++){const a=fs[i],b=fs[j];if(atWar(a,b))continue;const common=Object.keys(S.ai).filter(g=>g!=a&&g!=b&&g!='goauld'&&atWar(a,g)&&atWar(b,g)).length,sc=1+common*2+Math.random();if(sc>bs){bs=sc;best=[a,b]}}
- if(best){S.al[best[0]]=[best[1]];S.al[best[1]]=[best[0]];news(`${fn(best[0])} a ${fn(best[1])} uzavřeli spojenectví.`)}}
-const young=g=>(S.dr&&S.dr[g]&&Date.now()-S.dr[g].born<2700000)||(g=='goauld'&&Date.now()-(S.grev||0)<5400000);
-const genName=()=>{const a=['Ka','Ve','Lo','Zi','Ra','Tho','Mu','Sa','Ny','Or','El','Dru','Ha','Pi','Qu'],b=['ři','ové','ani','ci','ané','ioti'],c=Math.floor(Math.random()*360);return [a[Math.floor(Math.random()*a.length)]+a[Math.floor(Math.random()*a.length)].toLowerCase()+b[Math.floor(Math.random()*b.length)],`hsl(${c},70%,62%)`,`hsl(${c},60%,26%)`]};
-const NPOOL=[['Korthi','#ff9a4a','#7a2a10'],['Zeruni','#7aa8ff','#1a2f7a'],['Valdaři','#9be37a','#2a6a1a'],['Nyxové','#c58cff','#3a1a6a'],['Orvani','#ffd36a','#7a5a10'],['Talmiři','#6ee0d0','#145a54'],['Dravi','#ff6a8a','#6a1230'],['Kelethi','#d0d8e0','#4a5666'],['Sorianové','#ffb36a','#6a3a12'],['Aldrani','#8ad0ff','#1a4a7a'],['Mirovci','#e0a0ff','#5a1a6a'],['Thalorané','#a0ffb0','#1a6a3a'],['Veskari','#ffe08a','#6a5a12'],['Ishturi','#ff8a6a','#7a2a1a']];
-function elim(f){const r=RI(f);S.dead=S.dead||[];S.dead.push({id:f,n:r.n,c:r.c,t:Date.now()});delete S.ai[f];delete S.al[f];for(const k in S.al)S.al[k]=(S.al[k]||[]).filter(x=>x!=f);for(const k in S.aw)if(k.split('|').includes(f))delete S.aw[k];delete S.war[f];delete S.pc[f];
- if(S.co.includes(f)){S.co=S.co.filter(x=>x!=f);log(`Tvůj spojenec ${r.n} zanikl a opustil koalici.`,'l')}
- if(f=='goauld')S.rv=Date.now()+(3+Math.random()*3)*3600*1000;st('ev');const m=`Říše ${r.n} zanikla. Padla její poslední planeta.`+(f=='goauld'?` Vládce ${GOA.ruler} ale prý přežil v exilu.`:'');news(m);log(m,'l');hist(m)}
-function reviveGoa(){const hs=GAL[S.home].s,fl=GAL.filter(g=>!S.own[g.key]&&!S.pl[g.key]&&g.s!=hs);if(fl.length<2){S.rv=Date.now()+3600000;return}
- const caps=Object.keys(S.ai).map(f=>S.ai[f].cs);let best=null,bs=-1;for(const g of fl){const d=Math.min(...caps.map(c=>Math.abs(c-g.s)),9)+Math.random()*2;if(d>bs){bs=d;best=g}}
- const now=Date.now(),av=Object.values(S.ai).reduce((q,a)=>q+a.army,0)/Math.max(1,Object.keys(S.ai).length);S.own[best.key]={f:'goauld',b:1+av/8000,t:now,cap:true,bl:{naq:3,tri:3,reak:3,def:2,shd:1}};fl.filter(g=>g.s==best.s&&g.key!=best.key).slice(0,2).forEach(g=>S.own[g.key]={f:'goauld',b:1,bl:BL()});
- S.ai.goauld={army:Math.max(500,av*.6),cs:best.s,res:300,p:'war',pa:0,pb:0,pc:0,pt:0,tech:Math.round(Math.min(12,av/12000))};S.war.goauld=now;S.rv=0;S.grev=now;
- const m=`Goa'uldi se vrací! Vládce ${GOA.ruler} obnovil svou říši na planetě ${best.name}.`;news(m);log(m,'l');hist(m)}
-function checkExtinct(){if(!S.ai)return;for(const f of Object.keys(S.ai))if(!cnt(f))elim(f)}
-function spawnRace(kind,parent,keys){const used=n=>Object.values(S.dr||{}).some(d=>d.n==n)||(S.dead||[]).some(d=>d.n==n),pool=NPOOL.filter(x=>!used(x[0])),p=pool.length?pool[Math.floor(Math.random()*pool.length)]:genName();
- const id='n'+(++S.nid),ef=[{k:'atk',v:1.05,t:'+5 % síla útoku'},{k:'def',v:1.08,t:'+8 % obrana planet'},{k:'prod',v:1.06,t:'+6 % těžba'},{k:'res',v:.93,t:'výzkum −7 % ceny'}][Math.floor(Math.random()*4)],pr=['war','eco','def'][Math.floor(Math.random()*3)],now=Date.now();
- S.dr[id]={n:p[0],d:kind=='secese'?`Odštěpenci od říše ${fn(parent)}.`:'Nově vzniklá civilizace.',c:[p[1],p[2]],ally:{[ef.k]:ef.v},allyT:ef.t,born:now};
- S.ai[id]={army:kind=='secese'?Math.max(400,S.ai[parent].army*.3):300+Math.random()*200,cs:GAL[keys[0]].s,res:200,p:pr,pa:0,pb:0,pc:0,pt:0,tech:kind=='secese'?Math.floor((S.ai[parent].tech||0)*.6):0};
- keys.forEach((k,i)=>{const o=S.own[k]||{bl:i==0?{...BL(),naq:3,tri:3,reak:3,def:1}:BL()};S.own[k]={f:id,b:1,t:now,bl:o.bl||BL()};if(i==0)S.own[k].cap=true});
- let m;if(kind=='secese'){S.ai[parent].army*=.75;S.aw[wk(id,parent)]=now;m=`V říši ${fn(parent)} vypukla secese. Odštěpenci založili novou říši ${p[0]} (${keys.length} planet) a jsou s ní ve válce.`}else m=`Na planetě ${GAL[keys[0]].name} vznikla nová civilizace ${p[0]}.`;
- st('ev');news(m);log(m,'w');hist(m)}
-function secede(f){const a=S.ai[f];a.sc=Date.now()+6*3600*1000;const ks=Object.keys(S.own).filter(k=>S.own[k].f==f&&!S.own[k].cap);if(ks.length<3)return;ks.sort((x,y)=>Math.abs(GAL[y].s-a.cs)-Math.abs(GAL[x].s-a.cs));const take=ks.slice(0,Math.min(6,Math.ceil(ks.length*.45)));take.sort((x,y)=>sum(S.own[y].bl||{})-sum(S.own[x].bl||{}));spawnRace('secese',f,take)}
-function emerge(){const hs=GAL[S.home].s,fl=GAL.filter(g=>!S.own[g.key]&&!S.pl[g.key]&&g.s!=hs);if(fl.length<=3)return;const caps=Object.keys(S.ai).map(f=>S.ai[f].cs);let best=null,bs=-1;for(const g of fl){const d=Math.min(...caps.map(c=>Math.abs(c-g.s)),9)+Math.random()*2;if(d>bs){bs=d;best=g}}if(best){const nb=fl.find(g=>g.s==best.s&&g.key!=best.key);spawnRace('vznik',null,nb?[best.key,nb.key]:[best.key])}}
-const giftAmts=()=>[[500,500],[2000,2000],[Math.floor(S.n*.25),Math.floor(S.t*.25)]];
-function sendGift(id,i){if(!S.co.includes(id)||!S.ai[id])return;const c=giftAmts()[+i];if(!c||c[0]+c[1]<=0||!ok(c))return;pay(c);const tot=c[0]+c[1],a=S.ai[id];a.gf=(a.gf||0)+Math.round(tot*.6);st('gift',tot);S.gr=S.gr||{};S.gr[id]=(S.gr[id]||0)+tot;log(`Poslal jsi spojenci ${fn(id)} zásoby: ${fmt(c[0])} naquadah a ${fmt(c[1])} trinia. Při dopravě se část ztratí, zbytek použijí k rozvoji a jejich vděčnost roste.`,'w')}
-const giftHTML=id=>{const a=S.ai[id],gr=(S.gr||{})[id]||0;return `<p class="cost">Vděčnost ${Math.round(Math.min(100,gr/200))} % · zásoby k použití ${fmt(a.gf||0)}</p><div class="strip">`+giftAmts().map((c,i)=>`<button class="chip" data-k="gf:${id}|${i}" ${ok(c)&&c[0]+c[1]>0?'':'disabled'}>${i<2?'Poslat '+fmt(c[0])+' + '+fmt(c[1]):'Poslat 25 % zásob'}</button>`).join('')+`</div>`};
-const DK=()=>[.75,1,1.3][S.diff==null?1:S.diff];
-function income(f){let t=0,n=0;for(const k in S.own){const o=S.own[k];if(o.f!=f)continue;n++;const bl=o.bl||BL(),m=pm(k);t+=24+(bl.naq*m[0]+bl.tri*m[1])*9+bl.reak*4}return t*1.1*(f=='goauld'?1.25:1)*(1+.04*(S.ai[f].tech||0))/(1+Math.max(0,n-6)*.1)}
-function leader(){let b=null,bs=0,tot=0,c=0;for(const f in S.ai)if(f!='goauld'&&cnt(f)){const v=fsc(f);tot+=v;c++;if(v>bs){bs=v;b=f}}return c>2&&bs>1.4*(tot-bs)/(c-1)?b:null}
-function pickColony(f,a){const hs=GAL[S.home].s,fl=GAL.filter(g=>!S.own[g.key]&&!S.pl[g.key]&&g.s!=hs);if(fl.length<=6)return null;const ms=new Set(Object.keys(S.own).filter(k=>S.own[k].f==f).map(k=>GAL[k].s));let best=null,bs=-1e9;
- for(const g of fl){const m=pm(g.key),sc=g.fl*.4+(m[0]+m[1])*5-Math.abs(g.s-a.cs)*2.2+(ms.has(g.s)?4:0)+Math.random()*3;if(sc>bs){bs=sc;best=g}}return best}
-function aiWarPlan(f,lead){const a=S.ai[f],now=Date.now();if(f=='goauld'||a.army<200)return;if(Object.keys(S.ai).filter(g=>g!='goauld'&&atWar(f,g)).length>=(a.p=='war'?3:2))return;let best=null,bs=0;
- for(const g of Object.keys(S.ai)){if(g=='goauld'||g==f||(S.al[f]||[]).includes(g)||atWar(f,g)||young(g)||(S.ac[wk(f,g)]||0)>now||!cnt(g))continue;if(bloc(f).some(x=>S.co.includes(x))&&bloc(g).some(x=>S.co.includes(x)))continue;
-  const mine=bloc(f).reduce((q,x)=>q+S.ai[x].army,0),theirs=bloc(g).reduce((q,x)=>q+S.ai[x].army,0),sc=(mine/(theirs+50))/(1+Math.abs(S.ai[g].cs-a.cs)*.2)*(g==lead?1.6:1)*(1+cnt(g)*.03);if(mine>theirs*.9&&sc>bs){bs=sc;best=g}}
- if(best)declareAI(f,best)}
-function aiHitPlayer(f,k,A){const a=S.ai[f],now=Date.now(),D=dfn(k),r=fight(A,A*3.5,D,1);S.pn=now+(40+Math.random()*50)*1000/DK();let m;
- if(!r.win){S.pl[k].gar=Math.round(S.pl[k].gar*.85);a.army=Math.max(40,a.army-A*.6*(1-r.af));a.cd=now+90000;xp('def',50);st('defd');m=`${fn(f)} zaútočili na ${pn(k)} silou ${fmt(A)}. Obrana (${fmt(D)}) vydržela.`;log(m,'w')}
- else{m=`${fn(f)} dobyli planetu ${pn(k)} (útok ${fmt(A)} proti obraně ${fmt(D)}). Získáš ji zpět útokem z Galaxie.`;log(m,'l');const pp=S.pl[k];delete S.pl[k];S.own[k]={f,b:1.2,t:now,bl:{...pp.b},pf:'player'};if(S.cur==k)S.cur=S.home;a.army=Math.max(40,a.army-A*.4*(1-r.af))}
- hist(m);save();return true}
-function aiAttack(f){const a=S.ai[f],now=Date.now();if(a.army<60||(a.cd||0)>now)return false;const fr={war:.5,eco:.35,def:.3}[a.p]||.35,A=a.army*fr*(1+.05*(a.tech||0)),mine=S.co.includes(f);let best=null,bs=0,pl=false;
- const big=cnt(f)>=(f=='goauld'?28:20);for(const k in S.own){if(big)break;const o=S.own[k],g=o.f;if(g==f||(o.cap&&!(cnt(g)<=(g=='goauld'?2:3)&&A>=dfO(k)*(g=='goauld'?2.6:1.4)))||(o.t&&now-o.t<1800000)||(young(g)&&!S.aw[wk(f,g)])||(S.al[f]||[]).includes(g))continue;if(!(atWar(f,g)||(mine&&S.war[g]))||(mine&&S.co.includes(g)))continue;
-  const D=dfO(k);if(A<D*.85)continue;const sc=(GAL[k].p+1)/(D+1)*(S.ai[g].army<a.army?1.3:1)*(o.pf==f?1.5:1)*(g=='goauld'?.6:1)/(1+Math.abs(GAL[k].s-a.cs)*.12);if(sc>bs){bs=sc;best=k}}
- if(S.war[f]&&!mine&&now-S.start>600000&&now>=(S.pn||0))for(const k in S.pl){if(k==S.home)continue;const D=dfn(k);if(A<D*.85)continue;const sc=(GAL[k].p+1)/(D+1)*1.4/(1+Math.abs(GAL[k].s-a.cs)*.12);if(sc>bs){bs=sc;best=k;pl=true}}
- if(best==null)return false;if(pl)return aiHitPlayer(f,best,A);
- const o=S.own[best],d=S.ai[o.f],D=dfO(best),r=fight(A,A*3.5,D,1);d.th=1;
- if(r.win){S.own[best]={f,b:1.3,t:now,bl:o.bl||BL(),pf:o.f};a.army=Math.max(40,a.army-A*.5*(1-r.af));a.cd=now+150000;d.army*=.93;news(`${fn(f)} dobyli planetu ${GAL[best].name} od říše ${fn(o.f)}.`)}
- else{o.hit=now;o.b=Math.min(2.5,o.b*1.08);a.army=Math.max(40,a.army-A*.6);a.cd=now+120000;d.army*=.97;news(`${fn(o.f)} odrazili útok říše ${fn(f)} na ${GAL[best].name}.`)}return true}
-const tb=f=>Object.values(S.own).reduce((a,o)=>a+(o.f==f?sum(o.bl||{}):0),0);
-function aiBuild(f,a){const now=Date.now(),ks=Object.keys(S.own).filter(k=>S.own[k].f==f&&sum(S.own[k].bl||{})<GAL[k].fl);if(!ks.length)return false;const th=ks.filter(k=>S.own[k].hit&&now-S.own[k].hit<1200000),hot=th.length&&Math.random()<.65,pool=hot?th:ks,bl=S.own[pool[Math.floor(Math.random()*pool.length)]].bl,w={...{war:{naq:2,tri:2,reak:2,def:3,shd:2},eco:{naq:4,tri:4,reak:3,def:1,shd:1},def:{naq:2,tri:2,reak:2,def:4,shd:3}}[a.p]};if(hot){w.def*=2;w.shd*=2}
- let x=Math.random()*sum(w),t='naq';for(const q in w){x-=w[q];if(x<=0){t=q;break}}bl[t]++;return true}
-function aiStep(){const now=Date.now(),st=Math.min(240,Math.floor((now-S.at)/30000));if(st<1)return;S.at+=st*30000;const hrs=(now-S.start)/3.6e6,dk=DK();
- for(let i=0;i<st;i++){
-  for(const k in S.aw)if(now-S.aw[k]>900000&&Math.random()<.01+Math.min(.03,(now-S.aw[k]-900000)/3.6e7)){const [x,y]=k.split('|');delete S.aw[k];S.ac[k]=now+900000;news(`${fn(x)} a ${fn(y)} uzavřeli mír.`)}
-  if(Math.random()<.004)aiPact();
-  if(hrs>1.5&&Math.random()<.0008&&Object.keys(S.ai).length<10)emerge();
-  if(!S.ai.goauld&&S.rv&&now>=S.rv)reviveGoa();
-  const lead=leader();
-  for(const f in S.ai){const a=S.ai[f],n=cnt(f);if(!n)continue;
-   const foes=Object.keys(S.ai).filter(g=>g!=f&&atWar(f,g)&&cnt(g)>0),war=foes.length>0||!!S.war[f],yr=S.dr&&S.dr[f],yb=yr?Math.max(1,2-(now-yr.born)/10800000):1,gb=(a.gf||0)*.06,inc=income(f)*dk*yb+gb,mx=f=='goauld'?22:14,tgt=Math.min(mx,Math.max(4+hrs*2.2,yr?4+(now-yr.born)/3.6e6*2.5:0)+(a.p=='eco'?1:0)),low=n<tgt,strongest=Math.max(0,...foes.map(g=>S.ai[g].army));
-   let w={war:[.45,.25,.2,.1],eco:[.2,.35,.3,.15],def:[.3,.4,.15,.15]}[a.p].slice();
-   if(low)w=[w[0]-.1,w[1]-.05,w[2]+.3,w[3]-.15];
-   if(war||a.th>0)w=[w[0]+.2,w[1]+.05,w[2]-.2,w[3]-.05];
-   if(strongest>a.army*1.2)w[0]+=.12;
-   w=w.map(v=>Math.max(.02,v));const sw=sum(w);w=w.map(v=>v/sw);a.th=Math.max(0,(a.th||0)-.02);a.gf=(a.gf||0)-gb;
-   a.pa=(a.pa||0)+inc*w[0];a.pb=(a.pb||0)+inc*w[1];a.pc=(a.pc||0)+inc*w[2];a.pt=(a.pt||0)+inc*w[3];
-   a.army+=a.pa*.08/(1+a.army/(15000*n));a.pa=0;
-   const tc=250*(1+(a.tech||0)*1.2);if((a.tech||0)<20){if(a.pt>=tc){a.pt-=tc;a.tech=(a.tech||0)+1}}else{a.army+=a.pt*.08;a.pt=0}
-   const t=tb(f);if(t/n<25){let q=0;while(q<10&&a.pb>=80*(1+(t+q)/n)){if(!aiBuild(f,a)){a.army+=a.pb*.08;a.pb=0;break}a.pb-=80*(1+(t+q)/n);q++}}else{a.army+=a.pb*.08;a.pb=0}
-   const cc=600*(1+n*.2)*(yb>1?.8:1);if(n<mx){if(a.pc>=cc){const c=pickColony(f,a);if(c){S.own[c.key]={f,b:1,bl:BL()};a.pc-=cc;news(`${fn(f)} založili kolonii ${c.name}.`)}else{a.army+=a.pc*.08;a.pc=0}}}else{a.army+=a.pc*.08;a.pc=0}
-   const tries=1+(a.army>3000?1:0)+(a.army>12000?1:0),pa=({war:.08,eco:.04,def:.022})[a.p]*(war?1.5:.6)*dk;for(let q=0;q<tries;q++)if(Math.random()<pa)aiAttack(f);
-   if(Math.random()<({war:.02,eco:.005,def:.01})[a.p]*dk)aiWarPlan(f,lead);
-   if(n>=10&&hrs>1&&Object.keys(S.ai).length<10&&(a.sc||0)<now&&Math.random()<.0005*dk)secede(f);
-   if(f!='goauld'&&!S.war[f]&&!S.co.includes(f)&&now-S.start>900000&&(S.pc[f]||0)<now&&a.army>myArmy()*1.2&&Math.random()<({war:.01,eco:.002,def:.003})[a.p]*dk)aiDeclare(f)}}}
-const fsc=f=>Math.round(cnt(f)*150+tb(f)*12+S.ai[f].army/4+(S.ai[f].tech||0)*20);
-const myScore=()=>Math.round(nPl()*150+Object.values(S.pl).reduce((a,p)=>a+sum(p.b),0)*12+sum(S.g)*20+sum(S.r)*25+myArmy()/4);
-const board=()=>[{n:S.cmd+' ('+RACES[S.race].n+')',s:myScore(),me:1,pl:nPl(),ar:myArmy()},...Object.keys(S.ai).map(f=>({n:fn(f)+(f=='goauld'?' (vládce '+GOA.ruler+')':' (AI)'),f,s:fsc(f),pl:cnt(f),ar:S.ai[f].army,ally:S.co.includes(f),c:fc(f),p:PERS[S.ai[f].p],t:S.ai[f].tech||0}))].sort((a,b)=>b.s-a.s);
-// ---- tick, flotily, bitvy ----
-function tick(){if(!S.race)return;const now=Date.now(),dt=Math.min((now-S.ts)/1000,86400);S.ts=now;const r=rates();S.n+=r.n*dt;S.t+=r.t*dt;st('mined',(r.n+r.t)*dt);heroes().forEach(id=>addXp(id,dt*.25));for(const k in S.pl){const p=S.pl[k],br=p.b.bar||0;if(br>0){p.gx=(p.gx||0)+dt*br*(p.sp=='mil'?2:1)/60;const cap=br*10;if(p.gx>cap)p.gx=cap;while(p.gx>=1){p.gx--;if(p.gar<cap)p.gar++}}}xp('eco',(r.n+r.t)*dt*.03);aiStep();
- S.fl=S.fl.filter(f=>{if(f.ph==0&&now>=f.arr){arrive(f);f.ph=1}if(f.ph==1&&now>=f.back){const fl=f.fid!=null?S.fleets[f.fid]:null;if(fl){for(const k in f.u)fl.u[k]=(fl.u[k]||0)+f.u[k];fl.out=false}else for(const k in f.u)S.u[k]+=f.u[k];log('Flotila '+(fl?'„'+fl.n+'“ ':'')+'se vrátila domů.');return false}return true});
- fleetInit();buildTick();hqTick();researchTick();if(nPl()>=3)disc('anc','Při osidlování nových světů jsi našel artefakty dávné civilizace. Odemkla se větev Ancientské artefakty.');if(S.race=='replik')S.disc.rep=1;checkExtinct();msUpdate();draw();dyn()}
-function launch(t,k){fleetInit();const g=GAL[k],o=S.own[k];let u={},fl=null;
- if(t=='col'){if(S.u.col<1||o||S.pl[k]||nPl()+S.fl.filter(f=>f.t=='col').length>=maxPl())return;u={col:1}}
- else{if(!o||S.co.includes(o.f)||!S.war[o.f])return;fl=S.fleets[S.sf];if(!fl||fl.out)return;ATK.forEach(r=>u[r]=fl.u[r]||0);const a=pw(u)*fmult(fl);if(a<=0||(t=='occ'&&(a<dfO(k)*1.3||u.inf<10||nPl()>=maxPl())))return}
- if(fl){for(const x in u)fl.u[x]-=u[x];fl.out=true}else for(const x in u)S.u[x]-=u[x];
- const T=travel(k)*1000,now=Date.now();S.fl.push({t,k,u,fid:fl?S.sf:null,ph:0,go:now,arr:now+T,back:now+2*T});xp('spd',25);
- log(({col:'Kolonizační loď',atk:'Útočná flotila',occ:'Invazní flotila'})[t]+(fl?' „'+fl.n+'“':'')+' míří na '+g.name+' (cesta '+Math.round(T/1000)+' s).');save();draw()}
-function arrive(f){const g=GAL[f.k];
- if(f.t=='col'){if(S.pl[f.k]||S.own[f.k]||nPl()>=maxPl()){log('Kolonizace '+g.name+' selhala, planetu mezitím někdo obsadil. Loď se vrací.','l');return}S.pl[f.k]=home();f.u.col=0;st('col');log('Nová kolonie: '+g.name+'. Osadníci postavili základní doly.','w');return}
- const o=S.own[f.k];if(S.pl[f.k]||!o)return;if(S.co.includes(o.f)||!S.war[o.f]){log(g.name+': mezitím nastal mír nebo planeta patří spojenci, útok zrušen.');return}
- const fl=f.fid!=null?S.fleets[f.fid]:null,A=pw(f.u)*(fl?fmult(fl):1),Ah=(ATK.reduce((s,r)=>s+(f.u[r]||0)*HP[r]*mkM(r),0)||1)*(fl?STH[fl.st||'bal']:1),D=dfO(f.k),r=fight(A,Ah,D,shield()),ai=S.ai[o.f],lost={};
- ATK.forEach(x=>{const n=f.u[x]||0,l=Math.min(n,Math.round(n*(1-r.af)));if(l){lost[x]=l;f.u[x]-=l}});
- const lt=Object.entries(lost).map(([x,l])=>l+'× '+uName(x)).join(', ')||'žádné';let msg;
- if(r.win){const lm=hm('loot'),L=[Math.round(g.loot[0]*lm),Math.round(g.loot[1]*lm)];S.n+=L[0];S.t+=L[1];xp('loot',L[0]*.02);ai.army*=.9;msg=`Vítězství nad říší ${fn(o.f)} na ${g.name}. Kořist ${fmt(L[0])} naquadah, ${fmt(L[1])} trinium.`;
-  if(f.t=='occ'&&f.u.inf>0&&nPl()<maxPl()){const gar=Math.min(10,f.u.inf);f.u.inf-=gar;S.pl[f.k]={...home(),gar,b:{...BL(),...(o.bl||{})}};delete S.own[f.k];st('occ');msg+=` Planeta je obsazena, posádka ${gar}. Zástavba soupeře zůstala zachována.`}else o.b*=1.1}
- else{ai.army*=.97;msg=`Ústup z ${g.name}: tvá síla ${fmt(A)} nestačila na obranu ${fmt(D)}.`}
- msg+=` Ztráty: ${lt}.`;log(msg,r.win?'w':'l');hist(msg);xp('atk',r.win?60:25);if(fl)fleetXp(fl,r.win?60:25);if(r.win){st('win');if(o.f=='goauld')disc('gou',"Ve zbraních a lodích Goa'uldů jsi našel cizí technologie. Odemkla se větev Goa'uldské technologie.");if(o.f=='replik')disc('rep','Rozebral jsi replikátorský stroj. Odemkla se větev Adaptace replikátorů.')}report('Bitva o '+g.name,r.rs,msg,r.win)}
-function report(title,rs,msg,win){const o=$('#battle');if(!o.hidden)return;o.hidden=false;$('#b-title').textContent=title;$('#b-res').textContent='';$('#b-log').innerHTML='';$('#b-close').disabled=true;$('#b-a').style.width='100%';$('#b-d').style.width='100%';
- rs.forEach((q,i)=>setTimeout(()=>{$('#b-a').style.width=q.a*100+'%';$('#b-d').style.width=q.d*100+'%';const d=document.createElement('div');d.textContent=`Kolo ${i+1}: tvé jednotky způsobily ${fmt(q.da)} škody, obránci ${fmt(q.dd)}.`;$('#b-log').append(d)},i*900+100));
- setTimeout(()=>{$('#b-res').textContent=msg;$('#b-res').className=win?'w':'l';$('#b-close').disabled=false;$('#b-close').focus()},rs.length*900+300)}
-function counter(){S.ca=Date.now()+(45+Math.random()*55)*1000;if(Date.now()-S.start<600000)return;const ks=Object.keys(S.pl).filter(k=>k!=S.home),at=Object.keys(S.war).filter(f=>S.ai[f]&&cnt(f)>0);if(!ks.length||!at.length)return;
- const wt=f=>S.ai[f].army*({war:1.6,eco:.6,def:.5}[S.ai[f].p]);let x=Math.random()*at.reduce((s,f)=>s+wt(f),0);const f=at.find(q=>(x-=wt(q))<=0)||at[0],a=S.ai[f],A=a.army*({war:.5,eco:.35,def:.3}[a.p]||.35);
- ks.sort((p,q)=>dfn(p)-dfn(q));const k=ks[0],D=dfn(k);if(A<D*.7&&Math.random()<.7)return;const r=fight(A,A*3.5,D,1);let m;
- if(!r.win){S.pl[k].gar=Math.round(S.pl[k].gar*.85);a.army*=.7+.3*r.af;xp('def',50);m=`${fn(f)} zaútočili na ${pn(k)} silou ${fmt(A)}. Obrana (${fmt(D)}) vydržela.`;log(m,'w')}
- else{m=`${fn(f)} dobyli planetu ${pn(k)} (útok ${fmt(A)} proti obraně ${fmt(D)}). Získáš ji zpět útokem z Galaxie.`;log(m,'l');const pp=S.pl[k];delete S.pl[k];S.own[k]={f,b:1,t:Date.now(),bl:{...pp.b}};if(S.cur==k)S.cur=S.home}
- hist(m);save()}
-// ---- grafika ----
-function mkDefs(){$('#defs').innerHTML=Object.keys(RACES).map(id=>`<linearGradient id="ug-${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${RACES[id].c[0]}"/><stop offset="1" stop-color="${RACES[id].c[1]}"/></linearGradient>`).join('')+`<radialGradient id="ubg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#1c2a3c"/><stop offset="1" stop-color="#07090d"/></radialGradient>`+TK.map(t=>`<radialGradient id="g-${t}" cx=".35" cy=".3"><stop offset="0" stop-color="${TY[t].c[0]}"/><stop offset="1" stop-color="${TY[t].c[1]}"/></radialGradient>`).join('')+`<radialGradient id="shade" cx=".3" cy=".3" r=".85"><stop offset=".4" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".78"/></radialGradient><radialGradient id="sun"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffb43c"/><stop offset="1" stop-color="#ff7a2e" stop-opacity="0"/></radialGradient><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter><filter id="nzA" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".03 .06" numOctaves="4" seed="4"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.8 -.6"/></filter><filter id="nzB" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="3" seed="9"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.8 -.6"/></filter><filter id="neb" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".008 .014" numOctaves="4" seed="12"/><feColorMatrix values="0 0 0 0 .3 0 0 0 0 .45 0 0 0 0 .9 0 0 0 1.4 -.45"/></filter>`}
-function art(g,ctx,x,y,Rd){const r=rng(g.key*7+3),id='cp'+ctx+g.key,rocky=g.ty=='des'||g.ty=='vol',c0=TY[g.ty].c[0];
- let o=`<clipPath id="${id}"><circle cx="${x}" cy="${y}" r="${Rd}"/></clipPath><circle cx="${x}" cy="${y}" r="${Rd+4}" fill="${c0}" opacity=".3" filter="url(#glow)"/><g clip-path="url(#${id})"><circle cx="${x}" cy="${y}" r="${Rd}" fill="url(#g-${g.ty})"/><rect x="${x-Rd}" y="${y-Rd}" width="${2*Rd}" height="${2*Rd}" filter="url(#${rocky?'nzB':'nzA'})" opacity=".5" style="mix-blend-mode:overlay"/>`;
- if(rocky)for(let i=0;i<5;i++)o+=`<circle cx="${x+(r()-.5)*Rd*1.6}" cy="${y+(r()-.5)*Rd*1.6}" r="${Rd*(.06+r()*.12)}" fill="#000" opacity=".2"/>`;
- else if(g.ty=='gas'){for(let i=0;i<7;i++)o+=`<rect x="${x-Rd}" y="${y-Rd+i*2*Rd/7}" width="${2*Rd}" height="${2*Rd/7+.5}" fill="${i%2?'#fff':'#5a3418'}" opacity="${.12+(i%3)*.06}"/>`;if(g.name=='Jupiter')o+=`<ellipse cx="${x+Rd*.3}" cy="${y+Rd*.28}" rx="${Rd*.22}" ry="${Rd*.12}" fill="#c8583a" opacity=".85"/>`}else{o+='<g class="cl">';for(let i=0;i<4;i++)o+=`<ellipse cx="${x+(r()-.5)*Rd*1.4}" cy="${y+(r()-.5)*Rd*1.6}" rx="${Rd*(.3+r()*.4)}" ry="${Rd*.08}" fill="#fff" opacity=".4"/>`;o+='</g>'}
- if(g.name=='Země')o+=`<ellipse cx="${x-Rd*.25}" cy="${y-Rd*.1}" rx="${Rd*.35}" ry="${Rd*.22}" fill="#3f8a4a" opacity=".85"/><ellipse cx="${x+Rd*.35}" cy="${y+Rd*.3}" rx="${Rd*.25}" ry="${Rd*.15}" fill="#4f9a55" opacity=".85"/>`;
- if(g.ty=='vol')o+=`<path d="M${x-Rd} ${y+4}l${Rd*.7} -8l${Rd*.5} 10l${Rd*.8} -6" stroke="#ffb040" stroke-width="${Rd*.07}" fill="none" opacity=".85"/>`;
- return o+`<circle cx="${x}" cy="${y}" r="${Rd}" fill="url(#shade)"/></g><circle cx="${x}" cy="${y}" r="${Rd}" fill="none" stroke="#fff" stroke-opacity=".18"/>`}
-const ic=k=>`<svg class="ic"><use href="#i-${k}"/></svg>`;
-// ---- obrázky jednotek: originální kresby, styl podle rasy ----
-const RST={tauri:'ang',jaffa:'orn',tokra:'crys',asgard:'rnd',lantean:'rnd',wraith:'org',replik:'mod'},EG={ang:'#7fe3ff',orn:'#ffb040',crys:'#7dffd0',rnd:'#9fd8ff',org:'#d28bff',mod:'#7dffb0'};
-function uimg(r){
- const id=S.race,st=RST[id],c=RACES[id].c,eg=EG[st],I='u'+r,rn=rng(r.charCodeAt(0)*31+r.length),F=`url(#${I}h)`,rd=st=='rnd'||st=='org'||st=='orn',D='#05070b';
- const pts=P=>P.map(p=>p.join(',')).join(' ');
- const hull=(P,w)=>`<polygon points="${pts(P)}" fill="${F}" stroke="${rd?F:D}" stroke-width="${rd?(w||6):.8}" stroke-linejoin="round"/><polygon points="${pts(P)}" fill="url(#${I}m)" opacity=".5"/>`;
- const eng=(x,y,s)=>`<circle class="eng" cx="${x-s}" cy="${y}" r="${s*3}" fill="url(#${I}e)" filter="url(#${I}f)"/><rect x="${x-1}" y="${y-s}" width="9" height="${s*2}" rx="2" fill="#10151b" stroke="${eg}" stroke-opacity=".6" stroke-width=".8"/>`;
- const win=(x,y,n,g)=>{let q='';for(let i=0;i<n;i++)q+=`<rect x="${x+i*g}" y="${y}" width="3" height="2" fill="#ffe9a0" opacity="${.5+((i*7)%5)/10}"/>`;return q};
- const tur=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="3.5" fill="#1c232b" stroke="${eg}" stroke-opacity=".5" stroke-width=".7"/><rect x="${x}" y="${y-1}" width="9" height="2" fill="${eg}" opacity=".8"/>`;
- const ex=(b,f)=>{const w=b.x1-b.x0,mid=(b.y0+b.y1)/2;let q='';
-  if(!f){
-   if(st=='orn')q+=`<polygon points="${b.x0+8},${b.y0+10} ${b.x0-14},${b.y0-18} ${b.x0+34},${b.y0+2}" fill="#e8b84a" stroke="#fff3c0" stroke-width=".6"/><polygon points="${b.x0+8},${b.y1-10} ${b.x0-14},${b.y1+18} ${b.x0+34},${b.y1-2}" fill="#e8b84a" stroke="#fff3c0" stroke-width=".6"/>`;
-   if(st=='org'){for(let i=0;i<8;i++){const x=b.x0+w*(.12+i*.1),a=10+(i%3)*5,d=10+(i%2)*6;q+=`<path d="M${x} ${b.y0+2}l4-${a}l4 ${a}zM${x} ${b.y1-2}l4 ${d}l4-${d}z" fill="${c[1]}" stroke="${c[0]}" stroke-width=".6"/>`}q+=`<path d="M${b.x1} ${mid}q14-8 20-22M${b.x1} ${mid}q14 8 20 22" stroke="${c[0]}" stroke-width="2" fill="none"/>`}
-   if(st=='mod')for(let i=0;i<6;i++)q+=`<rect x="${b.x0+w*(.1+i*.14)}" y="${b.y0-9+(i%2)*3}" width="${w*.1}" height="10" fill="${F}" stroke="${eg}" stroke-opacity=".5" stroke-width=".7"/><rect x="${b.x0+w*(.1+i*.14)+2}" y="${b.y0-6+(i%2)*3}" width="${w*.06}" height="2" fill="${eg}"/>`;
-   if(st=='rnd')q+=`<ellipse cx="${b.x0+w*.55}" cy="${b.y0-2}" rx="${w*.12}" ry="9" fill="${F}" stroke="${eg}" stroke-opacity=".5"/>`;
-  }else{
-   if(st=='ang')q+=`<path d="M${b.x0+w*.25} ${b.y0+3}V${b.y1-3}M${b.x0+w*.5} ${b.y0+2}V${b.y1-2}M${b.x0+w*.75} ${b.y0+4}V${b.y1-4}" stroke="#000" stroke-opacity=".3"/><rect x="${b.x0+w*.2}" y="${mid-1}" width="${w*.7}" height="2.5" fill="${eg}" opacity=".7"/>`;
-   if(st=='orn')q+=`<path d="M${b.x1} ${mid}L${b.x1-w*.18} ${b.y0+6}V${b.y1-6}z" fill="#ffd36a" opacity=".9"/><path d="M${b.x0+w*.2} ${mid}H${b.x1-w*.2}" stroke="#ffe9a0" stroke-width="1.5"/>`;
-   if(st=='rnd')q+=`<ellipse cx="${b.x0+w*.5}" cy="${mid}" rx="${w*.4}" ry="${(b.y1-b.y0)*.12}" fill="none" stroke="${eg}" stroke-opacity=".6" stroke-width="1.5"/>`;
-   if(st=='crys')q+=`<polygon points="${b.x0+w*.2},${b.y0+2} ${b.x0+w*.6},${mid-6} ${b.x0+w*.2},${mid+4}" fill="#fff" opacity=".16"/><polygon points="${b.x0+w*.5},${b.y1-2} ${b.x0+w*.85},${mid+4} ${b.x0+w*.45},${mid+10}" fill="#fff" opacity=".12"/><circle cx="${b.x0+w*.62}" cy="${mid}" r="6" fill="url(#${I}e)"/>`;
-  }return q};
- const ship=(P,b,tw,turs,engs,win1)=>ex(b,0)+tw+hull(P)+ex(b,1)+win1+turs+engs;
- const head=()=>{
-  if(id=='asgard')return `<ellipse cx="124" cy="34" rx="15" ry="19" fill="#c9d0d8" stroke="${D}" stroke-width=".8"/><ellipse cx="129" cy="33" rx="6" ry="9" fill="${D}" transform="rotate(20 129 33)"/><ellipse cx="119" cy="33" rx="5" ry="8" fill="${D}" transform="rotate(-15 119 33)"/>`;
-  if(st=='orn')return `<path d="M107 42Q107 16 121 14Q135 16 135 42Z" fill="${F}" stroke="#e8b84a" stroke-width="1.5"/><path d="M121 14L121 36" stroke="#ffe9a0"/><circle cx="121" cy="26" r="3.2" fill="#ffd36a"/><rect x="112" y="38" width="20" height="8" rx="3" fill="#1a1405"/>`;
-  if(st=='org')return `<ellipse cx="122" cy="36" rx="11" ry="14" fill="#cfd8c8" stroke="${D}" stroke-width=".8"/><path d="M112 26Q96 30 88 50M114 24Q96 24 84 40M116 22Q100 18 82 28" stroke="#e8e0d0" stroke-width="2" fill="none"/><circle cx="126" cy="34" r="2" fill="${eg}"/><circle cx="118" cy="34" r="2" fill="${eg}"/>`;
-  if(st=='mod')return `<rect x="108" y="22" width="26" height="22" rx="3" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="112" y="30" width="18" height="5" fill="${eg}"/><rect x="118" y="44" width="6" height="6" fill="#2a323b"/>`;
-  if(st=='crys')return `<path d="M106 44Q104 18 122 16Q140 18 138 44Z" fill="${F}" stroke="${D}" stroke-width=".8"/><path d="M112 32Q122 28 132 32" stroke="${eg}" stroke-width="3" fill="none"/>`;
-  return `<circle cx="122" cy="32" r="14" fill="${F}" stroke="${D}" stroke-width=".8"/><path d="M124 27h16q2 8-3 13h-13z" fill="url(#${I}g)" stroke="${D}" stroke-width=".6"/>`};
- const sol=el=>`${el?`<circle class="aura" cx="120" cy="76" r="54" fill="none" stroke="${eg}" stroke-opacity=".5" stroke-width="2"/><circle cx="120" cy="76" r="54" fill="url(#${I}e)" opacity=".18"/>`:''}<ellipse cx="120" cy="131" rx="40" ry="5" fill="#000" opacity=".55"/>${el?`<path d="M100 56Q70 80 84 124L112 100Z" fill="${c[1]}" opacity=".85"/>`:''}
-<path d="M106 92L101 128H117L119 94Z" fill="${F}" stroke="${D}" stroke-width=".8"/><path d="M123 94L125 128H141L135 92Z" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="99" y="124" width="20" height="6" rx="2" fill="#10151b"/><rect x="123" y="124" width="20" height="6" rx="2" fill="#10151b"/>
-<path d="M98 58Q121 48 144 58L139 98Q121 104 103 98Z" fill="${F}" stroke="${D}" stroke-width=".8"/><path d="M104 62Q121 56 138 62" stroke="#fff" stroke-opacity=".45" fill="none"/><rect x="103" y="92" width="36" height="6" fill="#10151b"/><rect x="118" y="91" width="6" height="8" fill="${eg}" opacity=".8"/><circle cx="121" cy="76" r="${el?7:5}" fill="url(#${I}e)"/>
-<path d="M96 62L84 86L92 90L104 68Z" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="150" y="70" width="64" height="8" rx="3" fill="#232b34" stroke="${D}" stroke-width=".8"/><rect x="198" y="72" width="24" height="3.4" fill="#10151b"/><circle class="eng" cx="224" cy="74" r="5" fill="url(#${I}e)" filter="url(#${I}f)"/><rect x="164" y="66" width="14" height="4" rx="2" fill="#10151b"/>
-<path d="M140 60L172 74L168 83L136 71Z" fill="${F}" stroke="${D}" stroke-width=".8"/><circle cx="170" cy="78" r="4.5" fill="#10151b"/><circle cx="98" cy="60" r="${el?12:9}" fill="${F}" stroke="${D}" stroke-width=".8"/><circle cx="144" cy="60" r="${el?12:9}" fill="${F}" stroke="${D}" stroke-width=".8"/>
-${el?`<path d="M90 52l-6-14 12 8zM152 52l6-14-12 8z" fill="${c[0]}"/><path d="M114 66l7 5 7-5M114 72l7 5 7-5" stroke="#ffe9a0" stroke-width="1.6" fill="none"/>`:''}<rect x="116" y="44" width="12" height="10" fill="#1c232b"/>${head()}`;
- const BODY={inf:()=>sol(0),elite:()=>sol(1),
-  ftr:()=>{const wu=[[96,66],[56,22],[82,22],[142,62]],wl=[[96,74],[56,118],[82,118],[142,78]];return ex({x0:24,x1:214,y0:60,y1:80},0)+hull(wu,5)+hull(wl,5)+hull([[24,70],[64,62],[150,60],[214,70],[150,80],[64,78]])+ex({x0:24,x1:214,y0:60,y1:80},1)+`<ellipse cx="150" cy="70" rx="22" ry="4.5" fill="url(#${I}g)" stroke="${D}" stroke-width=".6"/><rect x="62" y="24" width="14" height="3" fill="${eg}"/><rect x="62" y="113" width="14" height="3" fill="${eg}"/><circle cx="60" cy="25.5" r="3" fill="url(#${I}e)"/><circle cx="60" cy="114.5" r="3" fill="url(#${I}e)"/>`+eng(22,65,2.6)+eng(22,75,2.6)},
-  crs:()=>ship([[30,58],[70,50],[160,48],[212,66],[226,72],[212,78],[160,96],[70,94],[30,86]],{x0:30,x1:226,y0:48,y1:96},`<polygon points="${pts([[100,50],[110,34],[142,34],[152,50]])}" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="116" y="38" width="22" height="3" fill="#bfe8ff" opacity=".8"/>`,tur(86,47)+tur(130,46)+tur(176,52),eng(24,62,3)+eng(24,72,3)+eng(24,82,3),win(60,70,20,7)),
-  flg:()=>ship([[24,56],[60,38],[130,32],[198,50],[234,72],[198,94],[130,112],[60,106],[24,88]],{x0:24,x1:234,y0:32,y1:112},`<polygon points="${pts([[84,38],[92,16],[114,16],[122,34]])}" fill="${F}" stroke="${D}" stroke-width=".8"/><polygon points="${pts([[130,32],[138,8],[164,8],[172,40]])}" fill="${F}" stroke="${D}" stroke-width=".8"/><polygon points="${pts([[56,42],[62,26],[80,26],[86,38]])}" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="142" y="12" width="18" height="3" fill="#bfe8ff" opacity=".8"/>`,tur(70,38)+tur(110,32)+tur(156,40)+tur(100,108)+tur(150,104)+`<rect x="108" y="96" width="44" height="6" rx="2" fill="${eg}" opacity=".6"/>`,eng(18,52,3.2)+eng(18,62,3.2)+eng(18,72,3.2)+eng(18,82,3.2)+eng(18,92,3.2),win(50,62,26,6)+win(56,80,24,6)),
-  col:()=>{const P=[[60,70],[90,44],[150,42],[196,58],[198,82],[150,98],[90,96]];return ex({x0:46,x1:196,y0:42,y1:98},0)+`<polygon points="${pts([[92,44],[148,44],[166,10],[104,10]])}" fill="${F}" stroke="${eg}" stroke-opacity=".5" stroke-width=".8"/><path d="M110 10L98 44M128 10L120 44M146 10L142 44M100 24H160M96 34H156" stroke="${eg}" stroke-opacity=".4"/>`+[0,1,2].map(i=>`<path d="M${96+i*30} 96V100" stroke="#2a323b" stroke-width="3"/><rect x="${82+i*30}" y="100" width="26" height="18" rx="4" fill="${F}" stroke="${D}" stroke-width=".8"/><rect x="${86+i*30}" y="104" width="18" height="3" fill="${eg}" opacity=".6"/>`).join('')+hull(P)+ex({x0:46,x1:196,y0:42,y1:98},1)+`<ellipse cx="184" cy="66" rx="16" ry="11" fill="url(#${I}g)" stroke="${D}" stroke-width=".6"/>`+win(100,68,10,7)+tur(130,50)+eng(54,62,3)+eng(54,80,3)}};
- let o=`<svg class="uimg" viewBox="0 0 240 140" role="img" aria-label="${uName(r)}"><defs><radialGradient id="${I}b" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="${c[1]}" stop-opacity=".6"/><stop offset=".6" stop-color="#0c1220"/><stop offset="1" stop-color="#04060a"/></radialGradient><linearGradient id="${I}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".18" stop-color="${c[0]}"/><stop offset=".7" stop-color="${c[1]}"/><stop offset="1" stop-color="${D}"/></linearGradient><linearGradient id="${I}m" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="${I}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8fbff"/><stop offset=".5" stop-color="#4fb6ff"/><stop offset="1" stop-color="#0d2a44"/></linearGradient><radialGradient id="${I}e"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="${eg}"/><stop offset="1" stop-color="${eg}" stop-opacity="0"/></radialGradient><filter id="${I}f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter></defs><rect width="240" height="140" rx="12" fill="url(#${I}b)"/><ellipse cx="60" cy="40" rx="80" ry="26" fill="${c[0]}" opacity=".12" filter="url(#${I}f)"/><ellipse cx="190" cy="100" rx="60" ry="22" fill="${eg}" opacity=".08" filter="url(#${I}f)"/>`;
- for(let i=0;i<30;i++)o+=`<circle cx="${(rn()*240).toFixed(1)}" cy="${(rn()*110).toFixed(1)}" r="${rn()<.15?1.2:.6}" fill="#fff" opacity="${(.3+rn()*.7).toFixed(2)}"/>`;
- o+=`<ellipse cx="120" cy="228" rx="190" ry="100" fill="#0a1424"/><ellipse cx="120" cy="228" rx="190" ry="100" fill="none" stroke="${eg}" stroke-opacity=".45" stroke-width="2"/>`;
- return o+BODY[r]()+`<rect x=".5" y=".5" width="239" height="139" rx="12" fill="none" stroke="${eg}" stroke-opacity=".3"/></svg>`}
-const col=k=>S.pl[k]?'#e8cf8a':S.own[k]?fc(S.own[k].f):'#6b7885';
-const POS=s=>({x:62+(s%6)*100+(s<6?0:30),y:(s<6?58+(s*37)%34:172+(s*53)%34)});
-function starmap(){let o=`<svg viewBox="0 0 640 250" class="smap" role="group" aria-label="Galaktická mapa"><rect width="640" height="250" filter="url(#neb)" opacity=".55"/>`;
- for(let s=0;s<11;s++){const a=POS(s),b=POS(s+1);o+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#4fb6ff" stroke-opacity=".25" stroke-dasharray="2 5"/>`}
- for(let s=0;s<12;s++){const p=POS(s),own=SK[s].map(k=>col(k)),mine=own.filter(c=>c=='#e8cf8a').length;
-  o+=`<g data-v="${s}" tabindex="0" role="button" aria-label="Systém ${SYS[s]}" class="sy"><circle cx="${p.x}" cy="${p.y}" r="36" fill="transparent"/><circle cx="${p.x}" cy="${p.y}" r="24" fill="url(#sun)" opacity=".65"/><circle cx="${p.x}" cy="${p.y}" r="5" fill="#fff"/>${vs==s?`<circle cx="${p.x}" cy="${p.y}" r="31" fill="none" stroke="#fff" stroke-dasharray="4 4" class="sel"/>`:''}`+own.map((c,i)=>{const a=-Math.PI/2+i*Math.PI*2/own.length;return `<circle cx="${p.x+19*Math.cos(a)}" cy="${p.y+19*Math.sin(a)}" r="4.5" fill="${c}" stroke="#0b0e12" stroke-width="1.5"/>`}).join('')+`<text x="${p.x}" y="${p.y+46}">${s+1}. ${SYS[s]}</text></g>`}
- return o+'</svg>'}
-const SSZ=[6,10,11,8,26,22,15,14],SC=['#ffe9a0','#ffb43c','#ff7a5a','#9ad0ff','#e0e8ff'];
-function sysview(){const ks=SK[vs],n=ks.length,sc=vs==0?'#ffe08a':SC[vs%5],XS=n==8?[88,130,176,224,306,392,474,546]:[110,215,320,425,530];
- let o=`<svg viewBox="0 0 640 220" class="smap" role="group" aria-label="Systém ${SYS[vs]}"><defs><radialGradient id="sg"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="${sc}"/><stop offset="1" stop-color="${sc}" stop-opacity="0"/></radialGradient></defs><circle cx="-14" cy="110" r="100" fill="url(#sg)"/>`;
- XS.forEach(x=>o+=`<circle cx="-14" cy="110" r="${x+14}" fill="none" stroke="#3b4652" stroke-opacity=".55" stroke-dasharray="2 5"/>`);
- if(vs==0)for(let i=0;i<26;i++){const a=-.32+.64*((i*7)%26)/26,R=265+((i*13)%9)-4;o+=`<circle cx="${-14+R*Math.cos(a)}" cy="${110+R*Math.sin(a)}" r="1.4" fill="#9aa4ae"/>`}
- ks.forEach((k,i)=>{const g=GAL[k],R=n==8?SSZ[i]:15+((vs*7+i*5)%9),off=i%2?28:-28,rr=XS[i]+14,cx=-14+Math.sqrt(rr*rr-off*off),cy=110+off,mine=S.pl[k],ow=S.own[k],st=mine?'#e8cf8a':ow?fc(ow.f):'none';
-  o+=`<g class="pl" data-pl="${k}" tabindex="0" role="button" aria-label="${pn(k)}"><circle cx="${cx}" cy="${cy}" r="${R+16}" fill="transparent"/>${art(g,'v',cx,cy,R)}${g.name=='Saturn'?`<ellipse cx="${cx}" cy="${cy}" rx="${R*1.9}" ry="${R*.45}" transform="rotate(-18 ${cx} ${cy})" fill="none" stroke="#d9c49a" stroke-opacity=".85" stroke-width="3"/>`:''}<circle cx="${cx}" cy="${cy}" r="${R+4}" fill="none" stroke="${st}" stroke-width="2" class="${ow&&!mine?'npc':''}"/>${sel==k?`<circle cx="${cx}" cy="${cy}" r="${R+9}" fill="none" stroke="#fff" stroke-dasharray="4 4"/>`:''}<text x="${cx}" y="${cy+R+18}">${pn(k)}</text><text x="${cx}" y="${cy+R+32}" style="fill:${mine?'#e8cf8a':ow?'#ff9a85':'#8b98a5'}">${mine?'tvoje':ow?fn(ow.f):'volná'}</text></g>`});
- return o+'</svg>'}
-function card(k){const g=GAL[k],m=S.pl[k],o=S.own[k],T=Math.round(travel(k)),cl=col(k),al=o&&S.co.includes(o.f),a=fpow(S.sf);let tg,bt,df='';
- if(m){tg=`Posádka ${m.gar} · obrana ${fmt(dfn(k))} · zastavěno ${sum(m.b)}/${fields(g)}`;bt=`<button class="go" data-k="s:${k}">Spravovat</button><button class="go" data-k="n:${k}">Přejmenovat</button>`+(k!=S.home?`<button class="go" data-k="g:${k}" ${S.u.inf>=5?'':'disabled'}>Posílit +5</button>`:'')}
- else if(o){const bl=o.bl||BL(),d=dfO(k),q=a>=d*1.6?['Snadný cíl','ez']:a>=d*.95?['Vyrovnaný boj','mid']:['Příliš silný','hard'];df=al||!S.war[o.f]?'':`<span class="df ${q[1]}">${q[0]}</span>`;tg=`Obrana ${fmt(d)} · kořist ${fmt(g.loot[0])} / ${fmt(g.loot[1])}${o.cap?' · hlavní město':''}<br>Zástavba: doly ${bl.naq}/${bl.tri} · reaktor ${bl.reak} · platforma ${bl.def} · štít ${bl.shd}`;bt=al?'<p>Spojenec, nelze napadnout.</p>':!S.war[o.f]?`<p>S říší ${fn(o.f)} je mír. Útočit můžeš po vyhlášení války.</p><button class="go" data-k="dw:${o.f}">Vyhlásit válku</button>`:`<button class="go" data-k="m:${k}" ${a>0&&fAvail()?'':'disabled'}>Zaútočit</button><button class="go" data-k="c:${k}" ${a>=d*1.3&&fInf()>=10&&nPl()<maxPl()&&fAvail()?'':'disabled'}>Obsadit</button>`}
- else{tg='Volná planeta. Kolonizace spotřebuje 1 kolonizační loď (máš '+S.u.col+').';bt=`<button class="go" data-k="k:${k}" ${S.u.col>0&&nPl()+S.fl.filter(f=>f.t=='col').length<maxPl()?'':'disabled'}>Kolonizovat</button>`}
- const bd=m?'<span class="tag">tvoje</span>':o?`<span class="own" style="background:${cl}">${fn(o.f)}</span>`:'<span class="tag gr">volná</span>';
- return `<div class="pc${sel==k?' sel':''}" style="--c:${cl}"><svg class="pa" viewBox="0 0 64 64">${art(g,'c'+gm,32,32,26)}</svg><div class="pi"><h3>${pn(k)} ${bd} ${df}</h3><p>${TY[g.ty].n} · ${fields(g)} polí · cesta ${T} s</p><p>${trTag(g)}</p>${g.desc?`<p>${g.desc}</p>`:''}<p class="tg">${tg}</p><div class="pb">${bt}</div></div></div>`}
-// ---- záložky ----
-const pm=k=>{const a=TY[GAL[k].ty].m,t=(TR[GAL[k].tr]||{m:[1,1]}).m;return[a[0]*t[0],a[1]*t[1]]},rsrW=()=>Object.keys(S.pl).reduce((a,k)=>a+(S.pl[k].b.rsr||0)*(GAL[k].tr=='V'?2:1),0),vPl=()=>Math.min(3,Object.keys(S.pl).filter(k=>GAL[k].tr=='V').length),trTag=g=>`<span class="trt t${g.tr}">${TR[g.tr].n}</span> <small>${TR[g.tr].d}</small>`;
-const plSum=k=>Object.values(S.pl).reduce((a,p)=>a+(p.b[k]||0),0),plSp=k=>Object.values(S.pl).filter(p=>p.sp==k).length;
-const BRN={mil:'Vojenství',def:'Obrana',eco:'Ekonomika',exp:'Expanze a pohon',sci:'Věda a strategie',dis:'Objevy'};
-const DOC={att:['Útočná doktrína','+12 % síla útoku, −5 % obrana'],def:['Obranná doktrína','+15 % obrana, −5 % síla útoku'],eco:['Hospodářská doktrína','+10 % těžba, −5 % ceny staveb'],sci:['Vědecká doktrína','−10 % cena výzkumu, +25 % rychlost']};
-const dm=k=>{const m=({att:{atk:1.12,def:.95},def:{def:1.15,atk:.95},eco:{prod:1.1},sci:{res:.9}})[S.doc];return(m&&m[k])||1},bcm=()=>Math.pow(.97,S.r.rec||0)*(S.doc=='eco'?.95:1);
-const rspeed=()=>(1+.2*S.g.lab)*(1+.1*(S.r.met||0))*(S.doc=='sci'?1.25:1)*(1+.05*rsrW())*(1+.04*vPl())*(1+.1*Math.min(3,plSp('sci')))*(1+.003*(S.medals||0))/Math.sqrt(hm('res')),rdur=k=>Math.max(5,Math.round((R[k].t||60)*Math.pow(1.5,S.r[k]||0)/rspeed())),rslots=()=>1+Math.floor(S.g.lab/4);
-function disc(k,m){if(!S.disc||S.disc[k])return;S.disc[k]=1;log(m,'w');news(m)}
-function startR(k){const d=R[k],l=S.r[k]||0,c=cost(d,l,eff('res'));if(!reqOK(d.req)||(d.br=='dis'&&!S.disc[k])||l>=(d.max||10)||S.rq.some(p=>p.k==k)||S.rq.length>=rslots()||!ok(c))return;pay(c);const now=Date.now(),du=rdur(k)*1000;S.rq.push({k,s:now,e:now+du,c});log(`Zahájen výzkum: ${d.n} (úr. ${l+1}), potrvá ${fmtT(du/1000)}.`)}
-function finishR(p){const d=R[p.k];S.r[p.k]=(S.r[p.k]||0)+1;S.rq=S.rq.filter(x=>x!==p);log(`Výzkum dokončen: ${d.n} (úr. ${S.r[p.k]}).`,'w');xp('res',60);st('rd');
- if(Math.random()<.15){st('brk');const o=Math.floor(Math.random()*3);if(o==0){S.n+=Math.round(p.c[0]*.5);S.t+=Math.round(p.c[1]*.5);log('Průlom! Výzkum vyšel levněji, než se čekalo: vráceno 50 % ceny.','w')}
-  else if(o==1&&S.rq.length){const now=Date.now();S.rq.forEach(x=>{x.e-=Math.max(0,x.e-now)*.3});log('Průlom! Nové poznatky urychlily ostatní probíhající výzkumy o 30 %.','w')}
-  else{const lk=Object.keys(R).filter(k=>R[k].br=='dis'&&!S.disc[k]);if(lk.length){const k=lk[Math.floor(Math.random()*lk.length)];disc(k,`Průlom! Objevena nová větev výzkumu: ${R[k].n}.`)}else{S.n+=Math.round(p.c[0]*.3);S.t+=Math.round(p.c[1]*.3);log('Průlom! Výzkum přinesl vedlejší zisk surovin.','w')}}}}
-function researchTick(){const now=Date.now();(S.rq||[]).slice().forEach(p=>{if(now>=p.e)finishR(p)})}
-function docHTML(){return `<h2>Doktrína</h2><p>Aktivní: <b>${S.doc?DOC[S.doc][0]:'žádná'}</b>. První volba je zdarma, změna stojí 400 naquadah a 400 trinia a jde nejvýše jednou za 10 minut.</p><div class="strip">`+Object.keys(DOC).map(k=>`<button class="chip ${S.doc==k?'act':''}" data-k="dc:${k}">${DOC[k][0]}<br><small>${DOC[k][1]}</small></button>`).join('')+`</div>`}
-function rrow(k){const d=R[k],l=S.r[k]||0,mx=d.max||10,c=cost(d,l,eff('res')),act=S.rq.some(p=>p.k==k),rq=reqOK(d.req),busy=!act&&S.rq.length>=rslots(),can=rq&&!act&&!busy&&l<mx&&ok(c);
- return `<div class="row"><div class="rh">${ic(k)}<div><h3>${d.n} <span class="lv">úr. ${l}${l>=mx?' (max)':''}</span></h3><p>${d.d}</p>${l<mx?`<span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])} · trvá ${fmtT(rdur(k))}</span>${rq?(act?'<p class="eta yes">Probíhá…</p>':busy?'<p class="bad">Všechny sloty jsou obsazené.</p>':`<p class="eta" data-c="${c[0]},${c[1]}"></p>`):`<p class="bad">Vyžaduje: ${reqTx(d.req)}</p>`}`:''}</div></div><button class="go" data-k="rs:${k}" ${can?'':'disabled'}>${act?'Probíhá':'Zkoumat'}</button></div>`}
-function tLab(){if(!S.g.lab)return '<p>Nejdřív postav Laboratoř na záložce Základna.</p>';
- let h=`<div class="stats"><div><small>Laboratoř</small><b>úr. ${S.g.lab}</b></div><div><small>Rychlost</small><b>×${rspeed().toFixed(2)}</b></div><div><small>Sloty</small><b>${S.rq.length} / ${rslots()}</b></div></div><h2>Probíhající výzkum</h2>`;
- h+=S.rq.length?S.rq.map((p,i)=>`<div class="card"><div class="rh">${ic(p.k)}<div style="flex:1"><h3>${R[p.k].n} <span class="lv">→ úr. ${(S.r[p.k]||0)+1}</span></h3><p class="cost">Zbývá <span class="cd" data-t="${p.e}"></span></p></div></div><div class="pg"><i data-s="${p.s}" data-e="${p.e}"></i></div><button class="go dm" data-k="rc:${i}">Zrušit (vrátí 50 %)</button></div>`).join(''):'<p>Žádný výzkum neprobíhá. Další slot získáš každými 4 úrovněmi laboratoře. Za dokončený výzkum může přijít průlom.</p>';
- if(S.r.str)h+=docHTML();
- for(const b of Object.keys(BRN)){const ks=Object.keys(R).filter(k=>R[k].br==b);h+=`<h2>${BRN[b]}</h2>`;
-  if(b=='dis'){const un=ks.filter(k=>S.disc[k]),lk=ks.filter(k=>!S.disc[k]);h+=un.map(rrow).join('')+lk.map(k=>`<div class="row"><div class="rh"><svg class="ic"><use href="#i-str"/></svg><div><h3>??? <span class="lv">neobjeveno</span></h3><p>${R[k].hint}</p></div></div></div>`).join('')}
-  else h+=ks.map(rrow).join('')}
- return h}
-function row(key,d,l,c,t,off,extra,req){const rq=reqOK(req),can=ok(c)&&!off&&rq,k=key.split(':')[1];return `<div class="row"><div class="rh">${ic(k)}<div><h3>${d.n}${l!==null?` <span class="lv">úr. ${l}</span>`:''}</h3><p>${d.d}</p><span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}${extra||''}</span>${rq?(off?`<p class="bad">${off}</p>`:`<p class="eta" data-c="${c[0]},${c[1]}"></p>`):`<p class="bad">Vyžaduje: ${reqTx(req)}</p>`}</div></div><div class="bt"><button class="go" data-k="${key}" ${can?'':'disabled'}>${t}</button>${l&&(key[0]=='b'||key[0]=='q')?`<button class="go dm" data-k="d${key}">Zbourat</button>`:''}</div></div>`}
-const newsHTML=()=>`<h2>Zprávy z galaxie</h2>`+(S.news.length?S.news.map(n=>`<p><small>${gstr(n.t)}</small> ${n.m}</p>`).join(''):'<p>Zatím klid. Říše se rozvíjejí a brzy začnou válčit.</p>');
-const STN={att:'útočná',bal:'vyvážená',def:'obranná'},STH={att:.9,bal:1,def:1.3},STA={att:1.15,bal:1,def:.9},STD={att:'+15 % síla, −10 % výdrž',bal:'bez úprav',def:'−10 % síla, +30 % výdrž'};
-const mkM=r=>1+.2*((S.mk||{})[r]||0),totU=r=>(S.u[r]||0)+(S.fleets||[]).reduce((a,f)=>a+(f.u[r]||0),0)+(S.fl||[]).reduce((a,f)=>a+(f.u[r]||0),0);
-const flneed=l=>Math.round(100*Math.pow(l+1,1.6)),flinfo=f=>{let l=0,x=f.xp||0;while(l<10&&x>=flneed(l)){x-=flneed(l);l++}return{lv:l,rem:x,need:l<10?flneed(l):1}};
-const cmdBonus=f=>{const h=f.cmd&&S.hero[f.cmd];return h?(.02+(HEROES[f.cmd].t=='atk'?.03:0))*h.lv:0};
-const fmult=f=>(1+.04*flinfo(f).lv)*STA[f.st||'bal']*(1+cmdBonus(f)),fpow=i=>{const f=S.fleets&&S.fleets[i];return f?pw(f.u)*fmult(f):0},fAvail=()=>{const f=S.fleets&&S.fleets[S.sf];return !!f&&!f.out},fInf=()=>((S.fleets&&S.fleets[S.sf])||{u:{}}).u.inf||0;
-function fleetXp(f,n){const a=flinfo(f).lv;f.xp=(f.xp||0)+n;const b=flinfo(f).lv;if(b>a)log(`Flotila „${f.n}“ dosáhla úrovně ${b} (+${b*4} % síla).`,'w');if(f.cmd&&S.hero[f.cmd])addXp(f.cmd,Math.round(n/2))}
-const UT={inf:6,elite:14,ftr:18,crs:90,flg:300,col:40},MKW={inf:1,elite:1.3,ftr:1.5,crs:4,flg:10},RM=['I','II','III','IV'];
-const hslots=()=>1+Math.floor(((S.g.han||0)+(S.g.kas||0))/4),hspeed=()=>(1+.12*(S.g.han||0))*(1+.06*(S.g.kas||0))*(S.doc=='eco'?1.05:1),hdur=(r,q)=>Math.max(4,Math.round(UT[r]*Math.pow(q,.85)/hspeed()));
-const mkLv=r=>(S.mk||{})[r]||0,mkCost=r=>UN[r].c.map(v=>Math.ceil(v*10*Math.pow(2,mkLv(r)))),mkDur=r=>Math.max(10,Math.round(60*MKW[r]*Math.pow(3,mkLv(r))/hspeed())),mkOk=r=>!!MKW[r]&&mkLv(r)<3&&S.g.han>=1+2*mkLv(r)&&S.r.zbr>=1+mkLv(r)&&reqOK(UN[r].req)&&!S.hq.some(x=>x.mk==r);
-function fleetInit(){if(!S.fleets){S.fleets=[0,1,2].map(i=>({n:'Flotila '+(i+1),u:{inf:0,elite:0,ftr:0,crs:0,flg:0},xp:0,st:'bal',cmd:null,out:false}));ATK.forEach(r=>{S.fleets[0].u[r]+=S.u[r]||0;S.u[r]=0});S.sf=0}if(S.sf==null)S.sf=0;S.hq=S.hq||[];S.mk=S.mk||{inf:0,elite:0,ftr:0,crs:0,flg:0};S.auto=!!S.auto}
-function startUnit(r,q){fleetInit();const c=uCost(r).map(v=>v*q);if(q<1||!reqOK(UN[r].req)||S.hq.length>=hslots()||!ok(c))return;pay(c);const now=Date.now(),du=hdur(r,q)*1000;S.hq.push({r,q,s:now,e:now+du,c});log(`Zahájena výroba: ${q}× ${uName(r)}, potrvá ${fmtT(du/1000)}.`)}
-function startMk(r){fleetInit();const c=mkCost(r);if(!mkOk(r)||S.hq.length>=hslots()||!ok(c))return;pay(c);const now=Date.now(),du=mkDur(r)*1000;S.hq.push({mk:r,s:now,e:now+du,c});log(`Zahájena modernizace: ${uName(r)} na Mk ${RM[mkLv(r)+1]}, potrvá ${fmtT(du/1000)}.`)}
-function hqTick(){const now=Date.now();(S.hq||[]).slice().forEach(x=>{if(now<x.e)return;S.hq.splice(S.hq.indexOf(x),1);
- if(x.r){const f=S.auto&&S.fleets[S.sf];if(f&&!f.out&&ATK.includes(x.r))f.u[x.r]=(f.u[x.r]||0)+x.q;else S.u[x.r]=(S.u[x.r]||0)+x.q;st('unit',x.q);log(`Výroba dokončena: ${x.q}× ${uName(x.r)}${f&&!f.out&&ATK.includes(x.r)?' (do flotily „'+f.n+'“)':' (v rezervě)'}.`,'w')}
- else{S.mk[x.mk]=mkLv(x.mk)+1;log(`Modernizace dokončena: ${uName(x.mk)} Mk ${RM[S.mk[x.mk]]}.`,'w')}})}
-const fleetSel=()=>{fleetInit();return `<div class="strip"><b>Poslat:</b>`+S.fleets.map((f,i)=>`<button class="chip ${S.sf==i?'act':''}" data-k="sf:${i}">${f.n} · ${fmt(fpow(i))}${f.out?' (na misi)':''}</button>`).join('')+`</div>`};
-function fleetCard(i){const f=S.fleets[i],sel=S.sf==i,fi=flinfo(f),used=new Set(S.fleets.filter((o,j)=>j!=i&&o.cmd).map(o=>o.cmd)),hs=heroes().filter(h=>!used.has(h)),dis=f.out?'disabled':'';
- return `<div class="card fl${sel?' sel':''}"><h3>${f.n} <span class="lv">úr. ${fi.lv}</span> ${f.out?'<span class="tag">na misi</span>':'<span class="tag gr">doma</span>'}${sel?' <span class="tag">vybraná</span>':''}</h3><p class="cost">Síla <b>${fmt(pw(f.u)*fmult(f))}</b> · formace ${STN[f.st||'bal']} · velitel ${f.cmd&&S.hero[f.cmd]?HEROES[f.cmd].n+' (+'+Math.round(cmdBonus(f)*100)+' %)':'žádný'}</p><div class="pg"><i style="width:${fi.lv>=10?100:fi.rem/fi.need*100}%"></i></div><p><small>Zkušenosti: ${fi.lv>=10?'max':fmt(fi.rem)+' / '+fmt(fi.need)} · každá úroveň +4 % síla</small></p>
- <div class="strip">${Object.keys(STN).map(x=>`<button class="chip ${(f.st||'bal')==x?'act':''}" data-k="fs:${i}|${x}">${STN[x]}<br><small>${STD[x]}</small></button>`).join('')}</div>
- <div class="strip"><button class="chip ${f.cmd?'':'act'}" data-k="fc:${i}|none">Bez velitele</button>${hs.map(h=>`<button class="chip ${f.cmd==h?'act':''}" data-k="fc:${i}|${h}">${HEROES[h].n}<br><small>${HT[HEROES[h].t].n} úr. ${S.hero[h].lv}</small></button>`).join('')}</div>
- ${ATK.filter(r=>reqOK(UN[r].req)||(f.u[r]||0)>0||(S.u[r]||0)>0).map(r=>`<div class="fr"><span>${uName(r)}</span><b>${f.u[r]||0}</b><div class=\"fb\">${[-10,-1,1,10].map(d=>`<button class="chip" data-k="fm:${i}|${r}|${d}" ${f.out||(d>0?!(S.u[r]>0):!(f.u[r]>0))?'disabled':''}>${d>0?'+'+d:d}</button>`).join('')}</div></div>`).join('')}
- <div class="strip"><button class="chip" data-k="fa:${i}" ${dis}>Vše z rezervy</button><button class="chip" data-k="fr:${i}" ${dis}>Vrátit do rezervy</button><button class="chip" data-k="frn:${i}">Přejmenovat</button>${sel?'':`<button class="chip" data-k="sf:${i}">Vybrat k misi</button>`}</div></div>`}
-const mkRow=r=>{const m=mkLv(r),c=mkCost(r),can=mkOk(r)&&ok(c)&&S.hq.length<hslots();return `<div class="row"><div class="rh">${uimg(r)}<div><h3>${uName(r)} <span class="lv">Mk ${RM[m]}</span></h3><p>${m>=3?'Maximální modernizace.':`Mk ${RM[m+1]}: +20 % síla i výdrž · vyžaduje Hangár ${1+2*m} a Zbraně ${1+m} · trvá ${fmtT(mkDur(r))}`}</p>${m<3?`<span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</span>`:''}</div></div><button class="go" data-k="mk:${r}" ${can?'':'disabled'}>Modernizovat</button></div>`};
-const prodRow=k=>{const rq=reqOK(UN[k].req),c=uCost(k);return `<div class="row urow" data-u="${k}"><div class="rh">${uimg(k)}<div><h3>${uName(k)} <span class="lv">rezerva ${S.u[k]||0} · celkem ${totU(k)}</span></h3><p>${UN[k].d}</p><span class="cost">Síla ${UN[k].atk} · HP ${HP[k]} · za kus <i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</span>${rq?`<p class="mx"></p><p class="tc cost"></p><p class="tt cost"></p><p class="eta" data-c="0,0"></p>`:`<p class="bad">Vyžaduje: ${reqTx(UN[k].req)}</p>`}</div></div>${rq?`<div class="qty"><input type="number" inputmode="numeric" min="1" value="${QT[k]||1}" aria-label="Počet kusů"><button class="chip" data-k="x:${k}">Max</button><button class="go" data-k="u:${k}">Vyrobit</button></div>`:''}</div>`};
-function tHangar(){fleetInit();const sl=hslots(),q=S.hq;
- let h=`<div class="stats"><div><small>Výrobní sloty</small><b>${q.length} / ${sl}</b></div><div><small>Rychlost výroby</small><b>×${hspeed().toFixed(2)}</b></div><div><small>Kolonizační lodě</small><b>${S.u.col||0}</b></div></div><h2>Probíhající výroba</h2>`;
- h+=q.length?q.map((x,i)=>`<div class="card"><div class="rh">${uimg(x.r||x.mk)}<div style="flex:1"><h3>${x.r?x.q+'× '+uName(x.r):'Modernizace: '+uName(x.mk)}</h3><p class="cost">Zbývá <span class="cd" data-t="${x.e}"></span></p></div></div><div class="pg"><i data-s="${x.s}" data-e="${x.e}"></i></div><button class="go dm" data-k="hc:${i}">Zrušit (vrátí 50 %)</button></div>`).join(''):'<p>Hangár nic nevyrábí. Výroba trvá a běží i když máš hru zavřenou. Další sloty přidává Hangár a Kasárna.</p>';
- h+=`<h2>Flotily</h2><p>Hotové jednotky jsou v rezervě doma. Rozděl je do flotil: na misi se vysílá vybraná flotila, zbytek zůstává doma. Flotily sbírají zkušenosti, mají formaci a mohou mít velitele z tvých hrdinů.</p><div class="card"><h3>Rezerva doma</h3><p class="cost">${ATK.map(r=>uName(r)+' '+(S.u[r]||0)).join(' · ')}</p><div class="strip"><button class="chip ${S.auto?'act':''}" data-k="au:x">Hotové jednotky automaticky do vybrané flotily: ${S.auto?'zapnuto':'vypnuto'}</button></div></div>`+S.fleets.map((f,i)=>fleetCard(i)).join('');
- h+=`<h2>Modernizace</h2><p>Každá úroveň Mk dává jednotkám +20 % síly i výdrže. Vyžaduje Hangár a výzkum Zbraní.</p>`+ATK.map(mkRow).join('');
- h+=`<h2>Výroba jednotek</h2>`+Object.keys(UN).map(prodRow).join('');return h}
-function tOverMain(){const r=rates(),bd=board(),rank=bd.findIndex(x=>x.me)+1;
- return `<div class="stats"><div><small>Planety</small><b>${nPl()} / ${maxPl()}</b></div><div><small>Těžba</small><b>${r.n.toFixed(1)} / ${r.t.toFixed(1)} /s</b></div><div><small>Síla flotily</small><b>${fmt(myArmy())}</b></div><div><small>Pořadí</small><b>${rank}. z ${bd.length}</b></div></div><h2>Tvoje planety</h2>`+
- Object.keys(S.pl).map(k=>{const p=S.pl[k],q=pr(k),g=GAL[k],us=sum(p.b),fl=fields(g);return `<div class="card"><div class="ph"><svg class="pa s" viewBox="0 0 64 64">${art(g,'o',32,32,26)}</svg><div><h3>${pn(k)} ${k==S.home?'<span class="tag">hlavní</span>':''}</h3><p>${TY[g.ty].n} · ${SYS[g.s]} · <span class="trt t${g.tr}">${TR[g.tr].n}</span></p></div></div><p class="cost"><i class="gem n"></i>+${q.n.toFixed(1)}/s <i class="gem t"></i>+${q.t.toFixed(1)}/s · Obrana ${fmt(dfn(k))} · Posádka ${p.gar}</p><p>Doly ${p.b.naq}/${p.b.tri} · Reaktor ${p.b.reak} · Platforma ${p.b.def} · Štít ${p.b.shd} · Továrna ${p.b.fac||0} · Tábor ${p.b.bar||0} · Stanice ${p.b.rsr||0}</p><p>Zaměření: ${p.sp?SPN[p.sp][0]:'žádné'}${p.q&&p.q.length?' · ve výstavbě: '+p.q.map(x=>B[x.key].n).join(', '):''}</p><div class="fbar"><i style="width:${Math.min(100,us/fl*100)}%"></i></div><p>Zastavěno ${us} / ${fl} polí</p>${q.e<1?`<p class="bad">Energie ${Math.round(q.e*100)} %</p>`:''}<button class="go" data-k="s:${k}">Spravovat</button><button class="go" data-k="n:${k}">Přejmenovat</button>${k!=S.home?`<button class="go" data-k="g:${k}" ${S.u.inf>=5?'':'disabled'}>Posílit +5</button>`:''}</div>`}).join('')+newsHTML()}
-const SPN={mine:['Těžební centrum','+20 % těžba na planetě'],fort:['Pevnost','+25 % obrana planety'],sci:['Vědecké centrum','+10 % rychlost výzkumu (nejvýše 3 planety)'],ind:['Průmyslový svět','+25 % rychlost stavby a −5 % ceny staveb na planetě'],mil:['Vojenská základna','−5 % cena jednotek (nejvýše 3 planety), dvojnásobný výcvik posádky']};
-const qslots=k=>1+Math.floor(((S.pl[k].b.fac||0)+(S.g.eng||0))/4),gslots=()=>1+Math.floor((S.g.eng||0)/4);
-const bmult=t=>bcm()*(t=='b'&&S.pl[S.cur].sp=='ind'?.95:1);
-const bspeed=t=>(1+.08*(S.g.eng||0))*(t=='b'?(1+.15*(S.pl[S.cur].b.fac||0))*(S.pl[S.cur].sp=='ind'?1.25:1)*(GAL[S.cur].tr=='S'?1.1:1):1)*(S.doc=='eco'?1.1:1);
-const bdur=(t,k,l)=>Math.max(3,Math.round(((t=='b'?B:G)[k].t||30)*Math.pow(1.45,l)/bspeed(t)));
-function startQ(t,k){const p=S.pl[S.cur],d=(t=='b'?B:G)[k],o=t=='b'?p.b:S.g,q=t=='b'?(p.q=p.q||[]):S.gq,l=o[k]||0,c=cost(d,l,bmult(t));
- if(!reqOK(d.req)||q.some(x=>x.key==k)||q.length>=(t=='b'?qslots(S.cur):gslots())||(t=='b'&&sum(p.b)+q.length>=fields(GAL[S.cur]))||!ok(c))return;pay(c);const now=Date.now(),du=bdur(t,k,l)*1000;q.push({key:k,s:now,e:now+du,c});log(`Zahájena stavba: ${d.n} (úr. ${l+1}), potrvá ${fmtT(du/1000)}.`)}
-function finishB(t,k,x){const d=(t=='b'?B:G)[x.key],p=t=='b'?S.pl[k]:null,o=t=='b'?p.b:S.g,q=t=='b'?p.q:S.gq;o[x.key]=(o[x.key]||0)+1;q.splice(q.indexOf(x),1);log(`Stavba dokončena: ${d.n} (úr. ${o[x.key]})${t=='b'?' na '+pn(k):''}.`,'w');xp('eco',25);st('bld');
- const r=Math.random();if(t=='b'&&r<.12&&['naq','tri','reak'].includes(x.key)){p.buf={m:1.25,e:Date.now()+1800000};log(`Bohaté ložisko! Těžba na planetě ${pn(k)} je o 25 % vyšší po dobu 30 minut.`,'w')}
- else if(r<.22){const now=Date.now();[...Object.values(S.pl).flatMap(pp=>pp.q||[]),...S.gq].forEach(y=>{y.e-=Math.max(0,y.e-now)*.3});log('Inspirace inženýrů! Ostatní probíhající stavby se urychlily o 30 %.','w')}
- else if(r<.3){S.n+=Math.round(x.c[0]*.4);S.t+=Math.round(x.c[1]*.4);log('Při stavbě byly nalezeny zásoby: vráceno 40 % ceny.','w')}}
-function fixQueues(){const now=Date.now(),fx=x=>{if(!isFinite(x.s)||!isFinite(x.e)){x.s=now;x.e=now+5000}};for(const k in S.pl)(S.pl[k].q||[]).forEach(fx);(S.gq||[]).forEach(fx);(S.rq||[]).forEach(fx);(S.hq||[]).forEach(fx)}
-function buildTick(){const now=Date.now();fixQueues();for(const k in S.pl){const p=S.pl[k];if(p.q&&p.q.length)p.q.slice().forEach(x=>{if(now>=x.e)finishB('b',k,x)})}S.gq.slice().forEach(x=>{if(now>=x.e)finishB('q',0,x)})}
-function brow(t,k){const d=(t=='b'?B:G)[k],p=S.pl[S.cur],o=t=='b'?p.b:S.g,l=o[k]||0,c=cost(d,l,bmult(t)),q=t=='b'?(p.q||[]):S.gq,inq=q.some(x=>x.key==k),full=t=='b'&&sum(p.b)+q.length>=fields(GAL[S.cur]),rq=reqOK(d.req),busy=!inq&&q.length>=(t=='b'?qslots(S.cur):gslots()),can=rq&&!inq&&!busy&&!full&&ok(c);
- return `<div class="row"><div class="rh">${ic(k)}<div><h3>${d.n} <span class="lv">úr. ${l}</span></h3><p>${d.d}</p><span class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])} · stavba ${fmtT(bdur(t,k,l))}</span>${!rq?`<p class="bad">Vyžaduje: ${reqTx(d.req)}</p>`:inq?'<p class="eta yes">Ve výstavbě…</p>':full?'<p class="bad">Planeta nemá volná pole.</p>':busy?'<p class="bad">Všechny stavební sloty jsou obsazené.</p>':`<p class="eta" data-c="${c[0]},${c[1]}"></p>`}</div></div><div class="bt"><button class="go" data-k="${t=='b'?'sb':'sq'}:${k}" ${can?'':'disabled'}>${inq?'Probíhá':l?'Vylepšit':'Postavit'}</button>${l?`<button class="go dm" data-k="d${t}:${k}">Zbourat</button>`:''}</div></div>`}
-function qhtml(arr,cancel){const isB=cancel=='bc',p=S.pl[S.cur];return arr.map((x,i)=>`<div class="card"><div class="rh">${ic(x.key)}<div style="flex:1"><h3>${(isB?B:G)[x.key].n} <span class="lv">→ úr. ${((isB?p.b:S.g)[x.key]||0)+1}</span></h3><p class="cost">Zbývá <span class="cd" data-t="${x.e}"></span></p></div></div><div class="pg"><i data-s="${x.s}" data-e="${x.e}"></i></div><button class="go dm" data-k="${cancel}:${i}">Zrušit (vrátí 50 %)</button></div>`).join('')}
-function tBase(){const p=S.pl[S.cur],g=GAL[S.cur],pp=pr(S.cur),q=p.q||(p.q=[]),us=sum(p.b),fl=fields(g),bf=p.buf&&Date.now()<p.buf.e;
- return `<div class="strip">`+Object.keys(S.pl).map(k=>`<button class="chip ${k==S.cur?'act':''}" data-k="p:${k}">${pn(k)}</button>`).join('')+`</div><div class="card"><p>${TY[g.ty].n} planeta · těžba +${pp.n.toFixed(1)} naquadah/s, +${pp.t.toFixed(1)} trinium/s</p><p>${trTag(g)}</p><p>Zastavěno <b>${us + q.length} / ${fl}</b> polí (včetně rozestavěných). Další pole přidá výzkum Terraformace.</p><div class="fbar"><i style="width:${Math.min(100,(us+q.length)/fl*100)}%"></i></div><p>Stavební sloty ${q.length} / ${qslots(S.cur)} · rychlost ×${bspeed('b').toFixed(2)} · posádka ${p.gar}${p.b.bar?` / ${p.b.bar*10}`:''}</p>${bf?`<p class="w">Bohaté ložisko: těžba +25 % ještě <span class="cd" data-t="${p.buf.e}"></span></p>`:''}</div>`
- +`<h2>Probíhající stavby</h2>`+(q.length?qhtml(q,'bc'):'<p>Na této planetě se nestaví. Stavba trvá a běží i když máš hru zavřenou. Za dokončenou stavbu může přijít náhodná událost.</p>')
- +`<h2>Zaměření planety</h2><p>Aktivní: <b>${p.sp?SPN[p.sp][0]:'žádné'}</b>. První volba je zdarma, změna stojí 300 naquadah a 300 trinia a jde nejvýše jednou za 15 minut.</p><div class="strip">`+Object.keys(SPN).map(k=>`<button class="chip ${p.sp==k?'act':''}" data-k="sp:${k}">${SPN[k][0]}<br><small>${SPN[k][1]}</small></button>`).join('')+`</div>`
- +`<h2>Budovy</h2>`+Object.keys(B).map(k=>brow('b',k)).join('')+(pp.e<1?`<p class="bad">Nedostatek energie, těžba běží na ${Math.round(pp.e*100)} %. Vylepši reaktor.</p>`:'')
- +`<h2>Velitelství</h2><p>Stavební sloty Velitelství ${S.gq.length} / ${gslots()} · rychlost ×${bspeed('q').toFixed(2)}</p>`+(S.gq.length?qhtml(S.gq,'gc'):'')+Object.keys(G).map(k=>brow('q',k)).join('')}
-function tMap(){
- const seg=`<div class="seg">`+[['map','Mapa'],['list','Cíle'],['fleet','Flotily'+(S.fl.length?' ('+S.fl.length+')':'')]].map(([k,t])=>`<button class="${gm==k?'act':''}" data-gm="${k}">${t}</button>`).join('')+`</div>`;
- if(gm=='map'){const sk=SK[vs],mine=sk.filter(k=>S.pl[k]).length,free=sk.filter(k=>!S.pl[k]&&!S.own[k]).length;
-  return seg+fleetSel()+`<div class="legend"><span><i style="background:#e8cf8a"></i>tvoje</span><span><i style="background:#6b7885"></i>volná</span><span><i style="background:#e0705a"></i>cizí (barva = říše)</span></div><div class="mapbox">${starmap()}</div><p class="hint">Klepni na systém v mapě, pod ní uvidíš jeho planety.</p><h2>Systém ${vs+1}: ${SYS[vs]}</h2><div class="mapbox">${sysview()}</div><p>${mine} tvoje · ${free} volné · ${sk.length-mine-free} cizí. Vybraná flotila: <b>${fmt(fpow(S.sf))}</b></p>`+sk.map(card).join('')}
- if(gm=='list'){const F={weak:['Slabé cíle',k=>S.own[k]&&S.war[S.own[k].f]&&fpow(S.sf)>=dfO(k)*.95],enemy:['Nepřátelé (válka)',k=>S.own[k]&&S.war[S.own[k].f]],free:['Volné planety',k=>!S.own[k]&&!S.pl[k]],mine:['Moje planety',k=>S.pl[k]]};
-  const ks=GAL.map(g=>g.key).filter(F[gf][1]).sort((x,y)=>travel(x)-travel(y)).slice(0,12);
-  return seg+fleetSel()+`<div class="strip">`+Object.keys(F).map(k=>`<button class="chip ${gf==k?'act':''}" data-gf="${k}">${F[k][0]}</button>`).join('')+`</div><p class="hint">Seřazeno podle vzdálenosti od aktuální planety. Vybraná flotila: <b>${fmt(fpow(S.sf))}</b></p>`+(ks.length?ks.map(card).join(''):'<p>Žádné planety v této skupině.</p>')}
- return seg+(S.fl.length?S.fl.map(f=>{const s=f.ph?f.arr:f.go,e=f.ph?f.back:f.arr,un=Object.entries(f.u).filter(([,n])=>n>0).map(([r,n])=>n+'× '+uName(r)).join(', ');return `<div class="fl"><b>${({col:'Kolonizace',atk:'Útok',occ:'Invaze'})[f.t]}${f.fid!=null&&S.fleets[f.fid]?' „'+S.fleets[f.fid].n+'“':''}</b> · ${GAL[f.k].name} · ${f.ph?'návrat':'let'} <span class="cd" data-t="${e}"></span><p>${un}</p><div class="pg"><i data-s="${s}" data-e="${e}"></i></div></div>`}).join(''):'<p>Žádné flotily na cestě.</p>')+`<h2>Poslední bitvy</h2>`+(S.hist.length?S.hist.map(h=>`<p>${h}</p>`).join(''):'<p>Zatím žádné.</p>')}
-function dipMap(){const fs=Object.keys(S.ai).filter(f=>f!='goauld'),seen=new Set(),pacts=[];fs.forEach(f=>(S.al[f]||[]).forEach(g=>{const k=wk(f,g);if(!seen.has(k)){seen.add(k);pacts.push([f,g])}}));
- const dot=f=>`<i class="dot s" style="background:${f=='player'?'#e8cf8a':fc(f)}"></i>`,nm=f=>f=='player'?'Ty':fn(f),mn=t=>Math.floor((Date.now()-t)/60000);
- const wars=Object.keys(S.aw).map(k=>{const [a,b]=k.split('|');return `<p>${dot(a)}${nm(a)} <b class="bad">⚔</b> ${dot(b)}${nm(b)} <small>(${mn(S.aw[k])} min)</small></p>`}).concat(Object.keys(S.war).filter(f=>f!='goauld').map(f=>`<p>${dot('player')}Ty <b class="bad">⚔</b> ${dot(f)}${nm(f)} <small>(${mn(S.war[f])} min)</small></p>`));
- return `<h2>Spojenectví a války říší</h2><div class="card"><h3>Spojenectví</h3>${S.co.length?`<p>${dot('player')}<b>Tvoje koalice</b>: ${S.co.map(f=>dot(f)+nm(f)).join(', ')}</p>`:''}${pacts.length?pacts.map(([a,b])=>`<p>${dot(a)}${nm(a)} <b class="grn">⇄</b> ${dot(b)}${nm(b)}</p>`).join(''):(S.co.length?'':'<p>Žádná spojenectví.</p>')}</div><div class="card"><h3>Války</h3>${S.ai.goauld?`<p>${dot('goauld')}${fn('goauld')} <b class="bad">⚔</b> všechny rasy včetně tebe (trvale)</p>`:`<p>${fn('goauld')} zanikli.</p>`}${wars.join('')}${wars.length?'':'<p>Žádné další války.</p>'}</div>`}
-function relHTML(){return `<h2>Války a mír</h2><p>Válku můžeš vyhlásit kterékoli říši. Do války vstoupí její spojenci i tvoji spojenci z koalice. Útočit lze jen na říše, s nimiž válčíš. Mír musí soupeř přijmout.</p>`+Object.keys(S.ai).map(f=>{const w=S.war[f],ally=S.co.includes(f),al=(S.al[f]||[]).map(fn).join(', '),a=S.ai[f];return `<div class="row"><div><h3><span class="dot" style="background:${fc(f)}"></span>${fn(f)}${f=='goauld'?' (vládce '+GOA.ruler+')':' (AI)'}${S.dr&&S.dr[f]?' <span class="tag">nová</span>':''} <span class="tag ${w?'':'gr'}">${ally?'spojenec':w?'válka':'mír'}</span></h3><p>${cnt(f)} planet · armáda ${fmt(a.army)}${al?' · spojenci: '+al:''}${f=='goauld'?' · válčí se všemi':(()=>{const q=Object.keys(S.ai).filter(g=>g!=f&&g!='goauld'&&atWar(f,g)).map(fn);if(S.war[f])q.push('ty');q.push(fn('goauld'));return ' · válčí s: '+q.join(', ')})()}${w?` · válka trvá ${Math.floor((Date.now()-w)/60000)} min`:''}</p></div>${ally?'<button class="go" disabled>Spojenec</button>':w?(f=='goauld'?'<button class="go" disabled>Mír nelze</button>':`<button class="go" data-k="dp:${f}">Navrhnout mír</button>`):`<button class="go" data-k="dw:${f}">Vyhlásit válku</button>`}</div>`}).join('')}
-const deadHTML=()=>S.dead&&S.dead.length?`<h2>Zaniklé říše</h2>`+S.dead.map(d=>`<p><i class="dot s" style="background:${d.c[0]}"></i>${d.n} <small>zanikla před ${Math.floor((Date.now()-d.t)/60000)} min</small></p>`).join(''):'';
-function tDip(){const n=S.co.length,c=[600*(n+1),400*(n+1)],bd=board(),me=bd.find(x=>x.me).s,tot=me+bd.filter(x=>x.ally).reduce((a,x)=>a+x.s,0);
- return dipMap()+relHTML()+`<h2>Koalice (${n} / ${Math.min(3,S.g.dip)})</h2><p>Spojence nelze napadnout a dávají bonus. S ostatními rasami můžeš válčit: stačí je napadnout v Galaxii (spojence nejdřív vyhoď z koalice). Skóre koalice: <b>${fmt(tot)}</b>.</p>`+Object.keys(S.ai).filter(x=>x!='goauld').map(id=>{const r=RI(id),in_=S.co.includes(id);return `<div class="row"><div><h3><span class="dot" style="background:linear-gradient(135deg,${r.c[0]},${r.c[1]})"></span> ${r.n} ${in_?'<span class="tag">spojenec</span>':'<span class="tag gr">neutrální</span>'}</h3><p>${r.d}</p><span class="cost">Bonus pro koalici: ${r.allyT}${in_?` (aktuálně ×${(1+Math.min(1,((S.gr||{})[id]||0)/20000)).toFixed(2)})`:''}</span>${in_?giftHTML(id):''}${in_?'':`<p class="cost"><i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</p><p class="eta" data-c="${c[0]},${c[1]}"></p>${S.war[id]?'<p class="bad">Válčíš s ní, nejdřív uzavři mír.</p>':''}`}</div><button class="go" data-k="${in_?'l':'j'}:${id}" ${in_||(n<Math.min(3,S.g.dip)&&ok(c)&&!S.war[id])?'':'disabled'}>${in_?'Opustit':'Přizvat'}</button></div>`}).join('')
- +`<h2>Žebříček říší</h2><ol class="board">`+bd.map(x=>`<li class="${x.me?'me':x.ally?'ally':''}"><span><i class="dot s" style="background:${x.c||'#e8cf8a'}"></i>${x.n}${x.ally?' · spojenec':''}<small>${x.pl} planet · armáda ${fmt(x.ar)}${x.p?' · '+x.p+' · tech '+x.t:''}${x.pl?'':' · poražena'}</small></span><b>${fmt(x.s)}</b></li>`).join('')+`</ol><p>Říše se rozvíjejí podle své povahy (agresivní, ekonomická, obranná): staví, kolonizují, trénují armádu a válčí mezi sebou i s tebou. Goa'uldi ovládá jediný vládce.</p>${deadHTML()}${newsHTML()}`}
-const HI={atk:'zbr',def:'shd',eco:'naq',res:'lab',spd:'poh',loot:'tri'};
-const FEM=new Set(['carter','ishta','garshaw','anise','weir','kralovna','replicarter','reese']);
-function hpic(id,lv){
- const h=HEROES[id],c=RACES[h.r].c,t=h.t,fem=FEM.has(id),eg=EG[RST[h.r]],P='hp'+id,asg=h.r=='asgard',wr=h.r=='wraith',rp=h.r=='replik',jf=h.r=='jaffa',hu=!asg&&!wr&&!rp,D='#05070b';
- let sd=0;for(const ch of id)sd=(sd*31+ch.charCodeAt(0))|0;const rn=rng(sd),pk=a=>a[Math.floor(rn()*a.length)];
- const skin=asg?'#aeb8c2':wr?'#b7c9a6':rp?'#9aa5b1':pk(['#f3d2b3','#e6b88f','#cf9468','#a8704a','#7c4c2f']),hair=wr?'#ece6d8':pk(['#241710','#3d2817','#5c3d22','#1b1b1e','#7d7d84','#b5833f']),eye=wr?'#ffd84a':rp?eg:pk(['#3b6ea8','#4a7a3a','#6b4a2a','#2a2a30','#6a8aa8']);
- const hs=fem?pk([2,2,3,1]):pk([0,1,0,3]),beard=!fem&&hu&&rn()<.35,cl=`url(#${P}c)`,nm=h.n.length>17?h.n.slice(0,16)+'…':h.n;
- let o=`<svg class="hpic" viewBox="0 0 160 200" role="img" aria-label="${h.n}"><defs><radialGradient id="${P}b" cx=".5" cy=".35" r=".9"><stop offset="0" stop-color="${c[0]}" stop-opacity=".6"/><stop offset=".55" stop-color="${c[1]}" stop-opacity=".75"/><stop offset="1" stop-color="${D}"/></radialGradient><radialGradient id="${P}s" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient><radialGradient id="${P}v" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".65"/></radialGradient><linearGradient id="${P}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient><linearGradient id="${P}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c0"/><stop offset=".5" stop-color="#c9a24b"/><stop offset="1" stop-color="#6b4a12"/></linearGradient><linearGradient id="${P}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d7dee6"/><stop offset=".5" stop-color="#8d99a6"/><stop offset="1" stop-color="#3a4654"/></linearGradient><clipPath id="${P}k"><rect x="6" y="6" width="148" height="188" rx="10"/></clipPath><filter id="${P}f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs><g clip-path="url(#${P}k)"><rect width="160" height="200" fill="url(#${P}b)"/>`;
- for(let i=0;i<7;i++){const a=(-70+i*23)*Math.PI/180,b=a+.14;o+=`<path d="M80 100L${(80+200*Math.cos(a)).toFixed(0)} ${(100+200*Math.sin(a)).toFixed(0)}L${(80+200*Math.cos(b)).toFixed(0)} ${(100+200*Math.sin(b)).toFixed(0)}Z" fill="#fff" opacity=".05"/>`}
- for(let i=0;i<18;i++)o+=`<circle cx="${(rn()*160).toFixed(1)}" cy="${(rn()*150).toFixed(1)}" r="${(.5+rn()*1.2).toFixed(1)}" fill="${eg}" opacity="${(.2+rn()*.5).toFixed(2)}"/>`;
- if(lv>=5)o+=`<circle cx="80" cy="92" r="52" fill="${lv>=10?'#ffd36a':eg}" opacity=".3" filter="url(#${P}f)"/>`;
- if((hs==2&&hu)||wr)o+=`<path d="M46 80Q36 132 42 170L118 170Q124 132 114 80Z" fill="${hair}"/><path d="M52 90Q48 130 52 166M108 90Q112 130 108 166" stroke="#fff" stroke-opacity=".18" fill="none"/>`;
- // tělo
- if(asg)o+=`<path d="M24 200Q28 150 62 142L98 142Q132 150 136 200Z" fill="#3a4654" stroke="${D}"/><path d="M62 142Q80 170 98 142L98 152Q80 182 62 152Z" fill="${cl}"/><circle cx="80" cy="176" r="6" fill="${pk([eg,'#c9a24b','#e0705a'])}" opacity=".9"/>`;
- else{o+=`<path d="M12 200Q14 150 52 140L108 140Q146 150 148 200Z" fill="${rp?`url(#${P}m)`:cl}" stroke="${D}" stroke-width="1"/><path d="M12 200Q14 150 52 140L108 140Q146 150 148 200Z" fill="url(#${P}s)"/><path d="M56 140L80 170L104 140L98 136L80 154L62 136Z" fill="#10151b"/>`;
-  if(rp)o+=`<path d="M40 150L56 200M120 150L104 200M80 170V200M30 175H130" stroke="${D}" stroke-opacity=".4"/><circle cx="80" cy="184" r="6" fill="${eg}"/>`;
-  else o+=`<circle cx="80" cy="184" r="7" fill="#10151b" stroke="url(#${P}g)" stroke-width="1.5"/><path d="M76 184l4-5 4 5-4 5z" fill="${eg}"/>`;
-  const sp=t=='atk'||wr;o+=`<ellipse cx="38" cy="152" rx="22" ry="12" fill="${cl}" stroke="${D}" transform="rotate(-14 38 152)"/><ellipse cx="122" cy="152" rx="22" ry="12" fill="${cl}" stroke="${D}" transform="rotate(14 122 152)"/>`;
-  if(sp)o+=`<path d="M24 146L16 126L38 142zM136 146L144 126L122 142z" fill="${c[1]}" stroke="url(#${P}g)" stroke-width="1"/>`;
-  if(t=='def')o+=`<path d="M80 150L66 158V176Q80 190 94 176V158Z" fill="none" stroke="url(#${P}g)" stroke-width="1.6" opacity=".9"/>`;
-  if(t=='loot')o+=`<path d="M54 134Q80 156 106 134L112 150Q80 176 48 150Z" fill="${c[1]}" stroke="${D}"/><path d="M80 164l-7 8 7 9 7-9z" fill="${eg}" stroke="#fff" stroke-width=".8"/>`;
-  o+=`<rect x="68" y="118" width="24" height="26" rx="8" fill="${skin}"/><path d="M68 128Q80 142 92 128V120H68Z" fill="#000" opacity=".28"/>`}
- // hlava a obličej
- if(asg){const sw=(.88+rn()*.24).toFixed(2);o+=`<g transform="translate(80 0) scale(${sw} 1) translate(-80 0)"><path d="M54 82Q54 40 80 40Q106 40 106 82Q104 112 80 128Q56 112 54 82Z" fill="${skin}"/><path d="M54 82Q54 40 80 40Q106 40 106 82Q104 112 80 128Q56 112 54 82Z" fill="url(#${P}s)"/><path d="M57 82Q67 78 75 94Q64 98 57 82Z" fill="${D}"/><path d="M103 82Q93 78 85 94Q96 98 103 82Z" fill="${D}"/><circle cx="66" cy="86" r="1.3" fill="#fff" opacity=".8"/><circle cx="94" cy="86" r="1.3" fill="#fff" opacity=".8"/><path d="M77 106h6M73 116Q80 119 87 116" stroke="${D}" stroke-opacity=".5" fill="none"/></g>${rn()<.5?`<circle cx="80" cy="54" r="3" fill="${eg}"/><circle cx="80" cy="54" r="3" fill="${eg}" filter="url(#${P}f)"/>`:`<path d="M72 52Q80 46 88 52" stroke="url(#${P}g)" stroke-width="1.6" fill="none"/>`}`}
- else if(rp){o+=`<path d="M52 54H108V102Q108 126 80 130Q52 126 52 102Z" fill="url(#${P}m)" stroke="${D}"/><path d="M52 54H108V102Q108 126 80 130Q52 126 52 102Z" fill="url(#${P}s)"/>${[`<rect x="58" y="80" width="44" height="9" rx="4.5" fill="${D}"/><rect x="62" y="82.5" width="36" height="4" rx="2" fill="${eg}"/><rect x="62" y="82.5" width="36" height="4" rx="2" fill="${eg}" filter="url(#${P}f)"/>`,`<circle cx="67" cy="86" r="7" fill="${D}"/><circle cx="93" cy="86" r="7" fill="${D}"/><circle cx="67" cy="86" r="3.6" fill="${eg}"/><circle cx="93" cy="86" r="3.6" fill="${eg}"/><circle cx="67" cy="86" r="4" fill="${eg}" filter="url(#${P}f)"/><circle cx="93" cy="86" r="4" fill="${eg}" filter="url(#${P}f)"/>`,`<rect x="56" y="78" width="48" height="14" rx="3" fill="${D}"/><circle cx="68" cy="85" r="2.6" fill="${eg}"/><circle cx="80" cy="85" r="2.6" fill="${eg}"/><circle cx="92" cy="85" r="2.6" fill="${eg}"/><rect x="56" y="78" width="48" height="14" rx="3" fill="${eg}" opacity=".12" filter="url(#${P}f)"/>`][Math.floor(rn()*3)]}${rn()<.5?`<path d="M80 54V38" stroke="${D}" stroke-width="2"/><circle cx="80" cy="36" r="3.5" fill="${eg}"/>`:`<path d="M64 54L58 42M96 54L102 42" stroke="${D}" stroke-width="2"/>`}<path d="M52 66H108M80 54V80M66 104H94M70 112H90" stroke="${D}" stroke-opacity=".45"/><path d="M62 94V104M98 94V104" stroke="${D}" stroke-opacity=".35"/>`}
- else{const hd=fem?'M52 84Q52 52 80 52Q108 52 108 84Q108 102 96 116Q80 130 64 116Q52 102 52 84Z':'M50 84Q50 52 80 52Q110 52 110 84Q110 104 98 116Q80 130 62 116Q50 104 50 84Z';
-  o+=`<ellipse cx="49" cy="90" rx="5" ry="8" fill="${skin}"/><ellipse cx="111" cy="90" rx="5" ry="8" fill="${skin}"/><path d="${hd}" fill="${skin}"/><path d="${hd}" fill="url(#${P}s)"/>`;
-  if(beard)o+=`<path d="M56 100Q58 124 80 128Q102 124 104 100Q96 112 80 112Q64 112 56 100Z" fill="${hair}" opacity=".85"/>`;
-  [68,92].forEach((x,k)=>{o+=`<ellipse cx="${x}" cy="88" rx="7.2" ry="${wr?3.6:4.4}" fill="${wr?'#f2f0d8':'#f5f5f0'}"/><circle cx="${x}" cy="88" r="${wr?3.4:3.5}" fill="${eye}"/>${wr?`<ellipse cx="${x}" cy="88" rx="1" ry="3.4" fill="${D}"/>`:`<circle cx="${x}" cy="88" r="1.7" fill="${D}"/>`}<circle cx="${x+1.3}" cy="86.7" r=".9" fill="#fff"/><path d="M${x-8} 87Q${x} ${wr?83:82} ${x+8} 87" stroke="${D}" stroke-width="1" fill="none"/><path d="M${x-9} ${wr?76:78}Q${x} ${wr?73:75} ${x+9} ${wr?78:79+(k?-1:1)}" stroke="${wr?'#d8d0c0':hair}" stroke-width="${fem?1.8:2.6}" fill="none" stroke-linecap="round"/>`});
-  o+=wr?`<path d="M62 66Q80 58 98 66M60 100Q64 108 70 112M100 100Q96 108 90 112" stroke="#6d8a6a" stroke-width="1.4" fill="none"/><path d="M77 104v4M83 104v4" stroke="#6d8a6a"/>`:`<path d="M80 90Q76 102 78 106Q80 108 84 106" stroke="#000" stroke-opacity=".35" fill="none"/>`;
-  o+=`<path d="M70 115Q80 120 90 115" stroke="${fem?'#a8404a':'#7a3a30'}" stroke-width="${fem?2.6:2}" fill="none" stroke-linecap="round"/>`;
-  if(t=='atk')o+=`<path d="M94 94L101 108" stroke="#f0d2c0" stroke-width="1.6" stroke-linecap="round"/><path d="M92 99l4 1M94 103l4 1" stroke="${D}" stroke-opacity=".4"/>`;
-  if(jf)o+=`<circle cx="80" cy="65" r="4.2" fill="url(#${P}g)" stroke="${D}" stroke-width=".6"/><path d="M76.5 65h7M80 61.5v7" stroke="#6b4a12"/>`;
-  if(h.r=='tokra')o+=`<circle cx="68" cy="88" r="9" fill="${eg}" opacity=".12"/><circle cx="92" cy="88" r="9" fill="${eg}" opacity=".12"/>`;
-  // vlasy / helma
-  if(hu&&t=='def')o+=`<path d="M46 82Q44 36 80 34Q116 36 114 82Q96 66 80 66Q64 66 46 82Z" fill="${cl}" stroke="${D}"/><path d="M46 82Q44 36 80 34Q116 36 114 82Q96 66 80 66Q64 66 46 82Z" fill="url(#${P}s)"/><path d="M80 34V66" stroke="url(#${P}g)" stroke-width="3"/><path d="M52 74Q80 62 108 74" stroke="url(#${P}g)" stroke-width="1.6" fill="none"/>`;
-  else if(hu){const hh=[`<path d="M48 78Q46 44 80 42Q114 44 112 78Q108 62 96 58Q80 54 64 58Q52 62 48 78Z" fill="${hair}"/>`,`<path d="M48 80Q44 40 84 40Q116 42 112 80Q106 58 86 56Q64 56 54 66Q50 72 48 80Z" fill="${hair}"/><path d="M60 52Q80 44 100 52" stroke="#fff" stroke-opacity=".25" fill="none"/>`,`<path d="M46 90Q40 40 80 38Q120 40 114 90Q110 64 96 56Q80 62 64 56Q50 64 46 90Z" fill="${hair}"/><path d="M62 50Q80 42 98 50" stroke="#fff" stroke-opacity=".25" fill="none"/>`,`<path d="M48 78Q46 44 80 42Q114 44 112 78Q108 62 96 58Q80 54 64 58Q52 62 48 78Z" fill="${hair}"/><path d="M110 66Q132 90 122 134" stroke="${hair}" stroke-width="6" fill="none" stroke-linecap="round"/>`][hs];o+=hh}
-  else if(wr)o+=`<path d="M48 80Q46 44 80 42Q114 44 112 80Q104 60 80 58Q58 60 48 80Z" fill="${hair}"/>${rn()<.5?`<path d="M56 96l6 8M104 96l-6 8" stroke="#4a6a48" stroke-width="2"/>`:`<path d="M70 52l3-12 4 10 4-14 4 14 4-10 3 12z" fill="${c[1]}" stroke="${c[0]}" stroke-width=".6"/>`}`;
-  if(t=='eco'&&hu)o+=`<circle cx="68" cy="88" r="10" fill="#bfe8ff" fill-opacity=".16" stroke="url(#${P}g)" stroke-width="1.8"/><circle cx="92" cy="88" r="10" fill="#bfe8ff" fill-opacity=".16" stroke="url(#${P}g)" stroke-width="1.8"/><path d="M78 87Q80 85 82 87" stroke="url(#${P}g)" stroke-width="1.6" fill="none"/>`;
-  if(t=='res')o+=`<rect x="58" y="58" width="44" height="9" rx="4.5" fill="#10151b" stroke="${eg}" stroke-opacity=".8"/><circle cx="68" cy="62.5" r="3" fill="${eg}" opacity=".8"/><circle cx="92" cy="62.5" r="3" fill="${eg}" opacity=".8"/><circle cx="112" cy="94" r="3.4" fill="${eg}"/><circle cx="112" cy="94" r="3.4" fill="${eg}" filter="url(#${P}f)"/>`;
-  if(t=='spd')o+=`<path d="M49 86Q48 46 80 44Q112 46 111 86" stroke="#10151b" stroke-width="4" fill="none"/><ellipse cx="49" cy="92" rx="6" ry="9" fill="#10151b" stroke="${eg}" stroke-opacity=".7"/><ellipse cx="111" cy="92" rx="6" ry="9" fill="#10151b" stroke="${eg}" stroke-opacity=".7"/><path d="M51 100Q56 118 72 120" stroke="#10151b" stroke-width="2.4" fill="none"/><circle cx="73" cy="120" r="3" fill="${eg}"/>`;
-  o+=`<path d="M108 68Q114 90 102 114" stroke="${eg}" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>`}
- if(t=='eco')o+=`<g transform="rotate(-12 31 160)"><rect x="14" y="146" width="34" height="24" rx="3" fill="#10151b" stroke="${eg}"/><path d="M19 152h14M19 157h22M19 162h10" stroke="${eg}" stroke-opacity=".8"/></g>`;
- o+=`<rect width="160" height="200" fill="url(#${P}v)"/></g>`;
- // rámeček, štítky, pásek zkušeností
- o+=`<rect x="8" y="168" width="144" height="24" fill="${D}" opacity=".62"/><text x="80" y="184" text-anchor="middle" style="text-anchor:middle;font:700 11.5px Cinzel,Georgia,serif;fill:#f0d99a;letter-spacing:.5px">${nm}</text>`;
- if(lv){o+=`<circle cx="24" cy="24" r="13" fill="url(#${P}g)" stroke="${D}" stroke-width="1.2"/><text x="24" y="29" text-anchor="middle" style="text-anchor:middle;font:700 14px Barlow,sans-serif;fill:#1a1405">${lv}</text>`;
-  for(let i=0;i<10;i++)o+=`<circle cx="${34+i*9.2}" cy="162" r="2.6" fill="${i<lv?'#f0d99a':'#2a323b'}" stroke="${D}" stroke-width=".5"/>`}
- o+=`<circle cx="136" cy="24" r="13" fill="#10151b" stroke="url(#${P}g)" stroke-width="1.6"/><svg x="127" y="15" width="18" height="18" style="color:#f0d99a"><use href="#i-${HI[t]}"/></svg>`;
- o+=`<rect x="3" y="3" width="154" height="194" rx="12" fill="none" stroke="url(#${P}g)" stroke-width="3"/><rect x="8" y="8" width="144" height="184" rx="9" fill="none" stroke="${eg}" stroke-opacity=".45"/>`;
- [[3,3,0],[157,3,90],[157,197,180],[3,197,270]].forEach(([x,y,r])=>o+=`<path transform="rotate(${r} ${x} ${y})" d="M${x} ${y+22}V${y}H${x+22}" stroke="#fff3c0" stroke-width="2" fill="none"/>`);
- return o+'</svg>'}
-function tHeroes(){const own=heroes(),mx=maxHeroes(),n=own.length;
- let h=`<h2>Moji hrdinové (${n} / ${mx})</h2><p>Hrdinové dávají bonusy a sami se zlepšují tím, jak pracují: zkušenosti jim přibývají časem a rychleji při činnostech jejich oboru (bitvy, těžba, výzkum, cesty). Další místo odemkneš vylepšením Kasáren (nyní úr. ${S.g.kas}).</p>`;
- h+=n?own.map(id=>{const d=HEROES[id],t=HT[d.t],l=S.hero[id],p=l.lv>=10?100:l.xp/need(l.lv)*100;return `<div class="card hero"><div class="ph">${hpic(id,l.lv)}<div><h3>${d.n} <span class="lv">úr. ${l.lv}${l.lv>=10?' (max)':''}</span></h3><p>${d.d}</p><p class="cost">${t.n}: +${Math.round(t.v*l.lv*100)} % ${t.u}${l.lv<10?` · další úroveň +${Math.round(t.v*100)} %`:''}</p></div></div><div class="pg"><i style="width:${p}%"></i></div><p><small>Zkušenosti ${fmt(l.xp)} / ${l.lv>=10?'max':fmt(need(l.lv))}</small></p></div>`}).join(''):'<p>Zatím nemáš žádného hrdinu.</p>';
- const av=Object.keys(HEROES).filter(id=>HEROES[id].r==S.race&&!S.hero[id]);
- h+=`<h2>K náboru</h2>`+(av.length?av.map(id=>{const d=HEROES[id],t=HT[d.t],c=hc(id),full=n>=mx;return `<div class="row"><div class="rh">${hpic(id,0)}<div><h3>${d.n}</h3><p>${d.d}</p><span class="cost">${t.n}: +${Math.round(t.v*100)} % ${t.u} za úroveň (max. úr. 10) · <i class="gem n"></i>${fmt(c[0])} <i class="gem t"></i>${fmt(c[1])}</span>${full?'<p class="bad">Není volné místo, vylepši Kasárna.</p>':`<p class="eta" data-c="${c[0]},${c[1]}"></p>`}</div></div><button class="go" data-k="h:${id}" ${full||!ok(c)?'disabled':''}>Najmout</button></div>`}).join(''):'<p>Všechny hrdiny své rasy už máš.</p>');
- return h}
-// ---- milníky a odměny ----
-let ov='main';
-const MSC=['Expanze','Válka','Rozvoj','Diplomacie','Hrdinové','Čas'],st=(k,n)=>{S.st=S.st||{};S.st[k]=(S.st[k]||0)+(n==null?1:n)};
-function msInit(){S.ms=S.ms||{};S.msn=S.msn||{};S.medals=S.medals||0;S.st=S.st||{};S.daily=S.daily||{t:0,s:0}}
-const msVal=m=>m.stat=='rk'?(S.st.rk||99):(S.st[m.stat]||0),msReach=m=>{const v=msVal(m);return m.goals.filter(g=>m.inv?v<=g:v>=g).length};
-function msClaimable(){msInit();let n=MS.reduce((a,m)=>a+Math.max(0,msReach(m)-(S.ms[m.id]||0)),0);if(Date.now()-S.daily.t>=20*3600*1000)n++;return n}
-function msUpdate(){msInit();const x=S.st,g=gdate(Date.now());x.pl=Math.max(x.pl||0,nPl());x.pow=Math.max(x.pow||0,Math.round(myArmy()));x.ally=Math.max(x.ally||0,S.co.length);x.hn=Math.max(x.hn||0,heroes().length);x.hlv=Math.max(x.hlv||0,...heroes().map(i=>S.hero[i].lv));x.tl=sum(S.r);x.gd=(g.y-1)*365+g.d;
- if(Date.now()>(S._rk||0)){S._rk=Date.now()+10000;const r=board().findIndex(b=>b.me)+1;x.rk=Math.min(x.rk||99,r)}
- MS.forEach(m=>{const r=msReach(m);if(r>(S.ms[m.id]||0)&&r>(S.msn[m.id]||0)){S.msn[m.id]=r;log(`Milník splněn: ${m.n} (stupeň ${r}/${m.goals.length}). Odměnu převezmeš v Přehledu, záložka Milníky.`,'w')}})}
-function claimMs(id){msInit();const m=MS.find(x=>x.id==id);if(!m)return false;const r=msReach(m),d=S.ms[id]||0;if(r<=d)return false;const out=[];
- for(let i=d;i<r;i++){const b=[300,1000,3000,8000,20000][i],n=Math.round(b*(m.rt=='n'?1.5:m.rt=='t'?.5:1)),t=Math.round(b*(m.rt=='t'?1.5:m.rt=='n'?.5:1));S.n+=n;S.t+=t;const md=i==m.goals.length-1?2:1;S.medals+=md;let sp='';
-  if(i>=1){const now=Date.now();
-   if(m.sp=='inf'){const q=[0,5,15,40,100][i];S.u.inf+=q;sp=`+${q} pěchoty`}
-   else if(m.sp=='ftr'){const q=[0,3,8,20,50][i];S.u.ftr+=q;sp=`+${q} stíhačů`}
-   else if(m.sp=='col'){S.u.col+=1;sp='+1 kolonizační loď'}
-   else if(m.sp=='hx'){const q=200*i*i;heroes().forEach(h=>addXp(h,q));sp=heroes().length?`+${q} zkušeností hrdinům`:''}
-   else if(m.sp=='rb'){const f=Math.min(.6,.15*i);S.rq.forEach(x=>{x.e-=Math.max(0,x.e-now)*f});sp=S.rq.length?`výzkumy zrychleny o ${Math.round(f*100)} %`:''}
-   else if(m.sp=='bb'){const f=Math.min(.6,.15*i);[...Object.values(S.pl).flatMap(p=>p.q||[]),...S.gq].forEach(x=>{x.e-=Math.max(0,x.e-now)*f});sp=`stavby zrychleny o ${Math.round(f*100)} %`}}
-  out.push(`${fmt(n)} naquadah, ${fmt(t)} trinia, ${md}× medaile${sp?', '+sp:''}`)}
- S.ms[id]=r;log(`Odměna za milník ${m.n}: ${out.join(' | ')}.`,'w');return true}
-function claimAll(){msInit();let c=0;MS.forEach(m=>{if(claimMs(m.id))c++});return c}
-function claimDaily(){msInit();const now=Date.now(),d=S.daily;if(now-d.t<20*3600*1000)return;d.s=(now-d.t<48*3600*1000)?d.s+1:1;d.t=now;const k=1+.25*Math.min(d.s-1,6),n=Math.round(400*k),t=Math.round(400*k);S.n+=n;S.t+=t;let ex='';if(d.s%7==0){S.medals+=1;heroes().forEach(h=>addXp(h,500));ex=' a medaile se zkušenostmi pro hrdiny'}st('daily');log(`Denní odměna (série ${d.s} dní): ${fmt(n)} naquadah a ${fmt(t)} trinia${ex}.`,'w')}
-function tMs(){msInit();const tot=MS.reduce((a,m)=>a+m.goals.length,0),dn=MS.reduce((a,m)=>a+(S.ms[m.id]||0),0),dly=Date.now()-S.daily.t>=20*3600*1000;
- let h=`<div class="stats"><div><small>Medaile</small><b>${S.medals}</b></div><div><small>Bonus</small><b>+${(S.medals*.4).toFixed(1)} % těžba</b></div><div><small>Splněno</small><b>${dn} / ${tot}</b></div></div>`;
- h+=`<div class="card"><h3>Denní odměna <span class="lv">série ${S.daily.s} dní</span></h3><p>Vyzvedni si ji jednou za 20 hodin. Pokud přijdeš do dvou dnů, série roste a odměna se zvětšuje (až o 150 %). Každý 7. den navíc medaile a zkušenosti hrdinům.</p>${dly?`<button class="go" data-k="dl:x">Převzít denní odměnu</button>`:`<p class="cost">Další odměna za <span class="cd" data-t="${S.daily.t+20*3600*1000}"></span></p>`}</div>`;
- const un=MS.filter(m=>msReach(m)>(S.ms[m.id]||0)).length;if(un)h+=`<button class="go" data-k="mc:x" style="width:100%;margin:8px 0">Převzít všechny odměny (${un})</button>`;
- for(const cat of MSC){h+=`<h2>${cat}</h2>`;MS.filter(m=>m.cat==cat).forEach(m=>{const v=msVal(m),r=msReach(m),d=S.ms[m.id]||0,n=m.goals.length,done=d>=n,goal=m.goals[Math.min(r,n-1)],pct=done?100:m.inv?Math.min(100,Math.max(0,(100-v)/(100-goal)*100)):Math.min(100,v/goal*100);
-   h+=`<div class="card ms${r>d?' rdy':''}"><h3>${m.n} <span class="lv">${d} / ${n}</span></h3><p>${m.d}</p><div class="pg"><i style="width:${pct}%"></i></div><p class="cost">${m.inv?'Nejlepší pořadí: '+(v>=99?'zatím žádné':v+'.'):fmt(v)} · cíl ${m.inv?goal+'.':fmt(goal)}${done?' · splněno':''}</p><div class="pips">${m.goals.map((g,i)=>`<i class="${i<d?'on':i<r?'rd':''}" title="${m.inv?g+'.':fmt(g)}"></i>`).join('')}</div>${r>d?`<button class="go" data-k="ms:${m.id}">Převzít odměnu (${r-d}×)</button>`:''}</div>`})}
- return h}
-function tOver(){msInit();const cl=msClaimable();return `<div class="seg two"><button class="${ov=='main'?'act':''}" data-ov="main">Přehled</button><button class="${ov=='ms'?'act':''}" data-ov="ms">Milníky${cl?' ('+cl+')':''}</button></div>`+(ov=='ms'?tMs():tOverMain())}
-function build(){return ({over:tOver,base:tBase,lab:tLab,hangar:tHangar,map:tMap,hero:tHeroes,dip:tDip})[tab]()}
-function render(){const h=build();if(h===last)return;last=h;$('#tab').innerHTML=h}
-function dyn(){const now=Date.now();
- document.querySelectorAll('.urow').forEach(r=>{const k=r.dataset.u,inp=r.querySelector('input');if(!inp)return;QT[k]=inp.value;const c=uCost(k),mx=Math.floor(Math.min(S.n/c[0],S.t/c[1])),q=Math.max(1,Math.floor(+inp.value)||1),tc=[c[0]*q,c[1]*q];r.querySelector('.mx').textContent='Můžeš vyrobit: '+fmt(mx)+' ks';r.querySelector('.tc').innerHTML=`Celkem za ${q} ks: <i class="gem n"></i>${fmt(tc[0])} <i class="gem t"></i>${fmt(tc[1])}`;r.querySelector('.eta').dataset.c=tc.join(',');r.querySelector('[data-k^="u:"]').disabled=!ok(tc)||(S.hq||[]).length>=hslots();r.querySelector('.tt').textContent='Výroba '+q+' ks potrvá '+fmtT(hdur(k,q))});document.querySelectorAll('.eta').forEach(e=>{if(!e.dataset.c)return;const [a,b]=e.dataset.c.split(',').map(Number),t=eta([a,b]);e.textContent=t;e.className='eta'+(t[0]=='✓'?' yes':'')});document.querySelectorAll('.cd').forEach(e=>e.textContent=fmtT(Math.max(0,(+e.dataset.t-now)/1000)));document.querySelectorAll('.pg i').forEach(e=>e.style.width=Math.min(100,Math.max(0,(now-e.dataset.s)/(e.dataset.e-e.dataset.s)*100))+'%')}
-function draw(){const now=Date.now(),g=gdate(now);$('#gal').textContent='Rok '+g.y+' · den '+g.d+' · '+g.t;
- const r=rates(),rk=board().findIndex(x=>x.me)+1;$('#r-n').textContent=fmt(S.n);$('#r-t').textContent=fmt(S.t);$('#p-n').textContent='+'+r.n.toFixed(1)+'/s';$('#p-t').textContent='+'+r.t.toFixed(1)+'/s';
- $('#r-p').textContent=nPl()+' / '+maxPl();$('#p-p').textContent='pořadí '+rk+'.';$('#gate').classList.toggle('open',S.fl.length>0);{const nb=document.querySelector('nav [data-tab="over"]');if(nb)nb.classList.toggle('dot',msClaimable()>0)}render()}
-function setTab(t){tab=t;last=null;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.dataset.tab==t));render();dyn();scrollTo(0,0)}
-function hud(){$('#diff')
+async function loadGame() {
+    try {
+        const response = await fetch('data.json');
+        gameState = await response.json();
+        
+        // Načtení z localStorage pokud existuje
+        const saved = localStorage.getItem('stellar_save_v17');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            gameState = { ...gameState, ...parsed };
+        }
+        
+        initGame();
+    } catch (e) {
+        console.error("Chyba při načítání dat:", e);
+    }
+}
+
+function saveGame() {
+    localStorage.setItem('stellar_save_v17', JSON.stringify(gameState));
+}
+
+function initGame() {
+    setInterval(gameLoop, 1000);
+    renderAll();
+}
+
+function gameLoop() {
+    // Základní produkce
+    gameState.resources.naquadah += (gameState.buildings.mineNaquadah.level * 2);
+    gameState.resources.trinium += (gameState.buildings.mineTrinium.level * 1);
+    
+    saveGame();
+    renderResources();
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.getElementById('tab-' + tabId).style.display = 'block';
+    renderAll();
+}
+
+function renderAll() {
+    renderResources();
+    renderOverview();
+    renderBase();
+    renderGalaxy();
+    renderFleet();
+    renderAnomalies();
+    renderLogs();
+}
+
+function renderResources() {
+    document.getElementById('res-naquadah').innerText = Math.floor(gameState.resources.naquadah);
+    document.getElementById('res-trinium').innerText = Math.floor(gameState.resources.trinium);
+    document.getElementById('res-energy').innerText = gameState.resources.energy;
+    document.getElementById('res-max-energy').innerText = gameState.resources.maxEnergy;
+    document.getElementById('res-fragments').innerText = gameState.techFragments || 0;
+}
+
+function renderOverview() {
+    const container = document.getElementById('overview-content');
+    container.innerHTML = `
+        <div class="card">
+            <h3>Stav Impéria</h3>
+            <p>Aktivní verze: <strong>${gameState.version}</strong></p>
+            <p>Získané technologické fragmenty: <strong>${gameState.techFragments || 0}</strong></p>
+            <p>Uložená bojová hlášení: <strong>${gameState.battleLogs.length}</strong></p>
+        </div>
+    `;
+}
+
+function renderBase() {
+    const container = document.getElementById('base-content');
+    container.innerHTML = `
+        <div class="card">
+            <h3>Budovy</h3>
+            <p>Těžba Naquadahu (Úroveň ${gameState.buildings.mineNaquadah.level}): <button onclick="upgradeBuilding('mineNaquadah')">Vylepšit (60N/20T)</button></p>
+            <p>Těžba Trinia (Úroveň ${gameState.buildings.mineTrinium.level}): <button onclick="upgradeBuilding('mineTrinium')">Vylepšit (80N/40T)</button></p>
+        </div>
+    `;
+}
+
+function upgradeBuilding(buildingKey) {
+    const b = gameState.buildings[buildingKey];
+    if (gameState.resources.naquadah >= b.costNaquadah && gameState.resources.trinium >= b.costTrinium) {
+        gameState.resources.naquadah -= b.costNaquadah;
+        gameState.resources.trinium -= b.costTrinium;
+        b.level++;
+        b.costNaquadah = Math.floor(b.costNaquadah * 1.5);
+        b.costTrinium = Math.floor(b.costTrinium * 1.5);
+        renderAll();
+    } else {
+        alert("Nedostatek surovin!");
+    }
+}
+
+function renderGalaxy() {
+    const container = document.getElementById('galaxy-content');
+    container.innerHTML = `
+        <div class="card">
+            <h3>Sektory Galaxie</h3>
+            <p>Země (Domovský svět) - <button onclick="simulateBattle('Země', 120)">Zaútočit vybranou flotilou</button></p>
+            <p>Mars (Bohatý na naquadah) - <button onclick="simulateBattle('Mars', 180)">Zaútočit vybranou flotilou</button></p>
+        </div>
+    `;
+}
+
+// Simulace bitvy s podporou taktik, válečných kořistí a battle logu
+function simulateBattle(targetName, enemyPower) {
+    // Vybereme první flotilu jako útočící (nebo výchozí)
+    const fleet = gameState.fleets[0];
+    let fleetPower = (fleet.units.drone * 10) + (fleet.units.cruiser * 35) + (fleet.units.battleship * 100);
+    
+    if (fleetPower <= 0) {
+        alert("Flotila nemá žádné jednotky k útoku!");
+        return;
+    }
+
+    // Aplikace taktiky
+    if (fleet.tactic === 'aggressive') {
+        fleetPower *= 1.25; // Vyšší útok
+    } else if (fleet.tactic === 'retreat' && fleetPower < enemyPower) {
+        alert("Taktika ústupu zachránila flotilu před porážkou!");
+        return;
+    }
+
+    let resultText = "";
+    let won = fleetPower >= enemyPower;
+
+    if (won) {
+        const rewardN = 200;
+        const rewardT = 100;
+        const rewardFrag = 2; // Válečná kořist
+        gameState.resources.naquadah += rewardN;
+        gameState.resources.trinium += rewardT;
+        gameState.techFragments = (gameState.techFragments || 0) + rewardFrag;
+        
+        resultText = `Vítězství nad ${targetName}! Získáno ${rewardN} Naquadahu, ${rewardT} Trinia a ${rewardFrag} technologické fragmenty.`;
+    } else {
+        resultText = `Porážka v sektoru ${targetName}. Síla nepřítele (${enemyPower}) převýšila vaši flotilu (${Math.floor(fleetPower)}).`;
+    }
+
+    // Zápis do bojového hlášení
+    gameState.battleLogs.unshift({
+        time: new Date().toLocaleTimeString(),
+        target: targetName,
+        result: resultText,
+        fleetPower: Math.floor(fleetPower),
+        enemyPower: enemyPower
+    });
+
+    // Omezení logu na posledních 10 záznamů
+    if (gameState.battleLogs.length > 10) gameState.battleLogs.pop();
+
+    saveGame();
+    renderAll();
+    alert(resultText);
+}
+
+function renderFleet() {
+    const container = document.getElementById('fleet-content');
+    container.innerHTML = `
+        <div class="card">
+            <h3>Správa flotil & Taktika</h3>
+            <p>Aktivní flotila: <strong>${gameState.fleets[0].name}</strong></p>
+            <p>Taktika chování: 
+                <select id="fleet-tactic" onchange="changeTactic(this.value)">
+                    <option value="standard" ${gameState.fleets[0].tactic === 'standard' ? 'selected' : ''}>Standardní</option>
+                    <option value="aggressive" ${gameState.fleets[0].tactic === 'aggressive' ? 'selected' : ''}>Agresivní drcení (+25% síla)</option>
+                    <option value="retreat" ${gameState.fleets[0].tactic === 'retreat' ? 'selected' : ''}>Ochranný ústup (Bezpečná flotila)</option>
+                </select>
+            </p>
+            <p>Jednotky v rezervě - Drony: ${gameState.reserveUnits.drone} | Křižníky: ${gameState.reserveUnits.cruiser}</p>
+            <button onclick="addTestUnits()">Přidat testovací drony (+5)</button>
+        </div>
+    `;
+}
+
+function changeTactic(val) {
+    gameState.fleets[0].tactic = val;
+    saveGame();
+}
+
+function addTestUnits() {
+    gameState.reserveUnits.drone += 5;
+    // Automatické přiřazení do hlavní flotily pro test
+    gameState.fleets[0].units.drone += 5;
+    saveGame();
+    renderAll();
+}
+
+function renderAnomalies() {
+    const container = document.getElementById('anomalies-content');
+    let html = `<div class="card"><h3>Dostupné anomálie k průzkumu</h3>`;
+    gameState.anomalies.forEach(anom => {
+        html += `
+            <div style="background:#111; padding:8px; margin:5px 0; border-radius:4px;">
+                <strong>${anom.name}</strong><br><small>${anom.desc}</small><br>
+                <button onclick="exploreAnomaly(${anom.id})">Prozkoumat</button>
+            </div>
+        `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function exploreAnomaly(anomId) {
+    const anom = gameState.anomalies.find(a => a.id === anomId);
+    if (!anom) return;
+
+    if (anom.rewardType === 'techFragments') {
+        gameState.techFragments = (gameState.techFragments || 0) + anom.rewardValue;
+        alert(`Průzkum uspěl! Získal jsi ${anom.rewardValue} technologických fragmentů.`);
+    } else if (anom.rewardType === 'naquadah') {
+        gameState.resources.naquadah += anom.rewardValue;
+        alert(`Průzkum uspěl! Nalezen volný naquadah: +${anom.rewardValue}.`);
+    } else {
+        alert(`Průzkum dokončen: Posádka získala cenné zkušenosti.`);
+    }
+
+    // Odstranění prozkoumané anomálie
+    gameState.anomalies = gameState.anomalies.filter(a => a.id !== anomId);
+    saveGame();
+    renderAll();
+}
+
+function renderLogs() {
+    const container = document.getElementById('logs-content');
+    if (!gameState.battleLogs || gameState.battleLogs.length === 0) {
+        container.innerHTML = `<p>Zatím žádná bojová hlášení v archivu.</p>`;
+        return;
+    }
+
+    let html = `<div class="card"><h3>Historie střetnutí</h3>`;
+    gameState.battleLogs.forEach(log => {
+        html += `
+            <div class="log-entry">
+                <small>[${log.time}] Sektor: <strong>${log.target}</strong></small><br>
+                <span>${log.result}</span><br>
+                <small>Síla flotily: ${log.fleetPower} vs Nepřítel: ${log.enemyPower}</small>
+            </div>
+        `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+window.onload = loadGame;
